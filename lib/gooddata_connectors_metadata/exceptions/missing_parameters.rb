@@ -1,4 +1,4 @@
-module GooddataConnectorsBase
+module GoodDataConnectorsMetadata
 
   class MissingParametersException < Exception
 
