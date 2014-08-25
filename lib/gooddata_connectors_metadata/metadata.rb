@@ -8,20 +8,23 @@ module GoodDataConnectorsMetadata
       connect(options)
       @global_hash = {}
       @hash = {}
+      @entities = Entities.new()
       # Lets load configuration files
       @hash["configuration"] = Configuration.load_from_schedule(options)
       if (!options["configuration_folder"].nil?)
         @hash["configuration"].merge!(Configuration.load_from_files(options["configuration_folder"]))
       end
+      @hash["configuration"]["global"] = options
     end
 
     # This method should be called from client, anytime the metadata (global) are changed
-    def store_global_hash(schedule_id, options = {})
-      db_collection_param = options["db_collection"]
+    def store_global_hash(options = {})
+      @global_hash.merge!(@entities.to_hash)
+      db_collection_param = options["db_collection"] || "default"
       raise MetadataException, "You have not specified the database collection" if db_collection_param.nil? or db_collection_param.empty?
       db_collection = @db[db_collection_param]
-      raise MetadataExpcetion, "The schedule_id is null, cannot generate database key" if schedule_id.nil?
-      db_key = schedule_id
+      raise MetadataExpcetion, "The schedule_id is null, cannot generate database key" if $SCHEDULE_ID.nil?
+      db_key = $SCHEDULE_ID
       record = db_collection.find({"_id" => db_key}).limit(1)
       if (record.count == 0)
         hash_for_storage = {"_id" => db_key, "created_at" => Time.now.utc,"updated_at" => Time.now.utc, "global_metadata" => @global_hash }
@@ -32,12 +35,11 @@ module GoodDataConnectorsMetadata
         hash_for_storage["metadata"]    = @global_hash
         db_collection.update({"_id" => db_key},hash_for_storage)
       end
-
     end
 
     # This method should be called from client, anytime the metadata (per execution) are changed
     def store_hash(schedule_id,execution_id,options = {})
-      db_collection_param = options["db_collection"]
+      db_collection_param = options["db_collection"] || "default"
       raise MetadataException, "You have not specified the database collection" if db_collection_param.nil? or db_collection_param.empty?
       db_collection = @db[db_collection_param]
       db_key = generate_key(schedule_id,execution_id)
@@ -54,20 +56,25 @@ module GoodDataConnectorsMetadata
     end
 
     # This method is called at metadata initialization time and it will load metadata (global) from metadata storage
-    def load_global_hash(schedule_id,options = {})
-      db_collection_param = options["db_collection"]
+    def load_global_hash(options = {})
+      db_collection_param = options["db_collection"] || "default"
       raise MetadataException, "You have not specified the database collection" if db_collection_param.nil? or db_collection_param.empty?
       db_collection = @db[db_collection_param]
-      db_key = schedule_id
+      db_key = $SCHEDULE_ID
       response = db_collection.find(:_id => db_key)
       raise MetadataException, "The response from database has returned more than one record. Critical error please contact administrator" if response.count > 1
-      @hash = response.first["global_metadata"]
+      if (response.count == 1)
+        @global_hash = response.first["metadata"] || {}
+        if (!@global_hash.empty?)
+          @entities = Entities.new("hash" => @global_hash["entities"])
+        end
+      end
     end
 
 
     # This method is called at metadata initialization time and it will load metadata (global) from metadata storage
     def load_hash(schedule_id,execution_id,options={})
-      db_collection_param = options["db_collection"]
+      db_collection_param = options["db_collection"] || "default"
       raise MetadataException, "You have not specified the database collection" if db_collection_param.nil? or db_collection_param.empty?
       db_collection = @db[db_collection_param]
       db_key = generate_key(schedule_id,execution_id)
@@ -125,33 +132,106 @@ module GoodDataConnectorsMetadata
     end
 
 
-    def add_default_entities(default_entities)
-      if (!@hash.include?("entities"))
-        @hash["entities"] = {}
-      end
-      default_entities.each do |entity|
-        if (!@hash["entities"].include?(entity))
-          @hash["entities"][entity] = {"id" => entity}
+    # Add entities from configuration file to global_entities storage (merging)
+    # Configuration is top most priority when merging
+    def add_entities()
+      if (@hash["configuration"].include?("entities"))
+        @hash["configuration"]["entities"].each_pair do |entity_name,entity_hash|
+          if (entity_hash.include?("fields") and !entity_hash["fields"].empty?)
+            if (entity_hash.include?("custom"))
+              entity_hash["custom"].merge!("load_fields_from_source_system" => false)
+            else
+              entity_hash["custom"] = {"load_fields_from_source_system" => false}
+            end
+          else
+            if (entity_hash.include?("custom"))
+              entity_hash["custom"].merge!("load_fields_from_source_system" => true)
+            else
+              entity_hash["custom"] = {"load_fields_from_source_system" => true}
+            end
+          end
+          entity_hash.merge!({"id" => entity_name}) unless entity_hash.include?("id")
+
+          if @entities.include?(entity_name)
+            entity = @entities[entity_name]
+            config_entity = Entity.new("hash" => entity_hash)
+            entity.merge! config_entity
+          else
+            @entities << Entity.new("hash" => entity_hash)
+          end
+        end
+
+        # We have entities section in cofiguration file, so we disable all other entities.
+        # In this case, user need to specificly name the entity which he want to download
+
+
+
+
+        entities_to_disable = @entities.get_entity_names - @hash["configuration"]["entities"].map{|k,v| k}
+        entities_to_disable.each do |entity_to_disable|
+          @entities[entity_to_disable].disable("Override by user config") unless @entities[entity_to_disable].disabled?
         end
       end
 
     end
 
 
+
+    # Lets add default entities, wchich should be donwloaded by downloader
+    # THis entities are added to entities list in metadata storage
+    def add_default_entities(default_entities)
+      # Adding default entities only in case that user has not specified the entities by himself
+      if (!@hash["configuration"].include?("entities"))
+
+        default_entities.each_pair do |entity_name,entity_hash|
+          if (entity_hash.include?("fields") and !entity_hash["fields"].empty?)
+            if (entity_hash.include?("custom"))
+              entity_hash["custom"].merge!("load_fields_from_source_system" => false)
+            else
+              entity_hash["custom"] = {"load_fields_from_source_system" => false}
+            end
+          else
+            if (entity_hash.include?("custom"))
+              entity_hash["custom"].merge!("load_fields_from_source_system" => true)
+            else
+              entity_hash["custom"] = {"load_fields_from_source_system" => true}
+            end
+          end
+          entity_hash.merge!({"id" => entity_name}) unless entity_hash.include?("id")
+
+          if @entities.include?(entity_name)
+            entity = @entities[entity_name]
+            config_entity = Entity.new("hash" => entity_hash)
+            entity.merge! config_entity
+          else
+            @entities << Entity.new(entity_hash)
+          end
+        end
+        # We have entities section in cofiguration file, so we disable all other entities.
+        # In this case, user need to specificly name the entity which he want to download
+        entities_to_disable = @entities.get_entity_names - default_entities.map{|k,v| k}
+        entities_to_disable.each do |entity_to_disable|
+          @entities[entity_to_disable].disable("Change in global default entity settings") unless @entities[entity_to_disable].disabled?
+        end
+      end
+    end
+
+
+
+
     def get_entity(entity)
-      @hash["entities"][entity]
+      @entities[entity]
     end
 
     def add_entity(entity)
-      if (!@hash.include?("entities"))
-        @hash["entities"] = {}
-      end
-      @hash["entities"][entity["id"]] = entity
+      @entities << entity
     end
 
     def list_entities
-      @hash["entities"].keys
+      @entities
     end
+
+
 
 
     def print_hash
@@ -163,15 +243,16 @@ module GoodDataConnectorsMetadata
 
     # Connection to MongoDB
     def connect(options = {})
-      host = options["database_host"] || "localhost"
+      host = options["db_host"] || "localhost"
       use_ssl = options["use_ssl"] || false
-      username = options["username"] || nil
-      password = options["password"] || nil
+      username = options["db_username"] || nil
+      password = options["db_password"] || nil
       db_name  = options["db_name"]
 
       begin
-        @client = MongoClient.new(host = host,user_ssl = use_ssl,username = username,password = password)
+        @client = MongoClient.new(host = host,user_ssl = use_ssl)
         @db     = @client[db_name]
+        auth    = @db.authenticate(username, password)
       rescue => e
         raise MetadataException, e.message
       end
