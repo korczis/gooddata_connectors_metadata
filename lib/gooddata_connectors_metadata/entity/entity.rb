@@ -72,7 +72,7 @@ module GoodDataConnectorsMetadata
           #  ]
           if field_element.instance_of?(String)
             field = Field.new({"id" => field_element})
-          elsif field_element.instance_of?(Hash) and !field_element["id"].nil?
+          elsif ((field_element.instance_of?(Hash) or field_element.instance_of?(BSON::OrderedHash)) and (field_element.include?("id")))
             field = Field.new({"hash" => field_element})
           else
             raise MetadataException, "Wrong parsing of field"
@@ -151,7 +151,6 @@ module GoodDataConnectorsMetadata
 
       if (enable_add)
         fields_to_add.each do |field|
-          pp field
           add_field(field)
         end
       end

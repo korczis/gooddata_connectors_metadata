@@ -27,7 +27,7 @@ module GoodDataConnectorsMetadata
       db_key = $SCHEDULE_ID
       record = db_collection.find({"_id" => db_key}).limit(1)
       if (record.count == 0)
-        hash_for_storage = {"_id" => db_key, "created_at" => Time.now.utc,"updated_at" => Time.now.utc, "global_metadata" => @global_hash }
+        hash_for_storage = {"_id" => db_key, "created_at" => Time.now.utc,"updated_at" => Time.now.utc, "metadata" => @global_hash }
         db_collection.insert(hash_for_storage)
       else
         hash_for_storage = record.first
@@ -156,6 +156,7 @@ module GoodDataConnectorsMetadata
             entity = @entities[entity_name]
             config_entity = Entity.new("hash" => entity_hash)
             entity.merge! config_entity
+
           else
             @entities << Entity.new("hash" => entity_hash)
           end

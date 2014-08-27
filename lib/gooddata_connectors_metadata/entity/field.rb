@@ -20,7 +20,7 @@ module GoodDataConnectorsMetadata
         if(!args["type"].nil?)
           @type = BaseType.create(args["type"])
         else
-          @type = BaseType.create("string-255")
+          @type = nil
         end
         @custom = args["custom"] || {}
         @history = args["history"] unless (args["history"].nil?)
@@ -43,7 +43,7 @@ module GoodDataConnectorsMetadata
       {
           "id" => @id,
           "name" => @name,
-          "type" => @type.to_hash,
+          "type" => @type.to_simple_string,
           "custom" => @custom,
           "history" => @history,
           "enabled" => @enabled

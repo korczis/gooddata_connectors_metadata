@@ -5,8 +5,8 @@ module GoodDataConnectorsMetadata
 
     def initialize(args = {})
       @entities = {}
-      if (!args.empty? and !args.include?("hash"))
-        args["hash"]["entities"].each do |entity_hash|
+      if (!args.empty? and args.include?("hash"))
+        args["hash"].each do |entity_hash|
           entity = Entity.new({"hash" => entity_hash})
           @entities[entity.id] = entity
         end

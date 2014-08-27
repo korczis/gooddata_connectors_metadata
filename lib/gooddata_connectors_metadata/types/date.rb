@@ -34,6 +34,10 @@ module GoodDataConnectorsMetadata
       @with_time = hash["with_time"] || false
     end
 
+    def with_time?
+      @with_time
+    end
+
 
 
   end

@@ -8,7 +8,7 @@ module GoodDataConnectorsMetadata
     def initialize(input)
       if (input.instance_of? String)
         from_simple_string(input)
-      elsif (input.instance_of? Hash)
+      elsif (input.instance_of? Hash or input.instance_of? (BSON::OrderedHash))
         from_hash(input)
       end
     end
@@ -66,7 +66,7 @@ module GoodDataConnectorsMetadata
       type = nil
       if (input.instance_of? String)
         type = input.split("-")[0]
-      elsif (input.instance_of? Hash)
+      elsif (input.instance_of? (Hash) or input.instance_of? (BSON::OrderedHash))
         type = input["type"]
       end
       case type
@@ -84,13 +84,6 @@ module GoodDataConnectorsMetadata
           raise "Bad log file type: #{input.to_s}"
       end
     end
-
-
-
-
-
-
-
 
 
 
