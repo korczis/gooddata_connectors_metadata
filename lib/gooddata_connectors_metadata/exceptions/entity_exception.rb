@@ -1,8 +1,9 @@
-module GoodDataConnectorsMetadata
+module GoodData
+  module Connectors
+    module Metadata
+      class EntityException < Exception
 
-class EntityException < Exception
-
+      end
+    end
   end
-
-
 end

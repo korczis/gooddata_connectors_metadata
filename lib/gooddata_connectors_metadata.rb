@@ -4,31 +4,36 @@ require "json"
 require "gooddata"
 
 require_relative "gooddata_connectors_metadata/metadata"
+require_relative "gooddata_connectors_metadata/runtime"
 %w(metadata_exception missing_parameters entity_exception type_exception).each {|file| require_relative "gooddata_connectors_metadata/exceptions/#{file}"}
 %w(metadata_exception missing_parameters).each {|file| require_relative "gooddata_connectors_metadata/exceptions/#{file}"}
 %w(entities entity field).each {|file| require_relative "gooddata_connectors_metadata/entity/#{file}"}
 %w(base boolean date decimal integer string).each {|file| require_relative "gooddata_connectors_metadata/types/#{file}"}
 require_relative "gooddata_connectors_metadata/configuration/configuration"
 
-module GoodDataConnectorsMetadata
+module GoodData
+  module Connectors
+    module Metadata
 
-  class MetadataMiddleware < GoodData::Bricks::Middleware
-    def call(params)
-      $log = params["GDC_LOGGER"]
+      class MetadataMiddleware < Bricks::Middleware
+        def call(params)
+          $log = params["GDC_LOGGER"]
 
-      $log.info "Initilizing metadata storage"
-      metadata = Metadata.new(params)
-      #This section will handle default metadata load
+          $log.info "Initilizing metadata storage"
+          metadata = Metadata.new(params)
+          #This section will handle default metadata load
 
-      raise MetadataException, "The variable LOAD_ID is not present in metadata initialization call" if params["LOAD_ID"].nil?
-      raise MetadataException, "The variable SCHEDULE_ID is not present in metadata initialization call" if params["SCHEDULE_ID"].nil?
-      $SCHEDULE_ID = params["SCHEDULE_ID"]
-      $LOAD_ID = params["LOAD_ID"]
-      if !$SCHEDULE_ID.nil?
-        $log.info "Loading global metadata for schedule #{$SCHEDULE_ID}"
-        metadata.load_global_hash($SCHEDULE_ID)
+          raise MetadataException, "The variable LOAD_ID is not present in metadata initialization call" if params["LOAD_ID"].nil?
+          raise MetadataException, "The variable SCHEDULE_ID is not present in metadata initialization call" if params["SCHEDULE_ID"].nil?
+          $SCHEDULE_ID = params["SCHEDULE_ID"]
+          $LOAD_ID = params["LOAD_ID"]
+          if !$SCHEDULE_ID.nil?
+            $log.info "Loading global metadata for schedule #{$SCHEDULE_ID}"
+            metadata.load_global_hash($SCHEDULE_ID)
+          end
+          @app.call(params.merge('metadata_wrapper' => metadata))
+        end
       end
-      @app.call(params.merge('metadata_wrapper' => metadata))
     end
   end
 end

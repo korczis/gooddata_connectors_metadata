@@ -1,8 +1,10 @@
-module GoodDataConnectorsMetadata
+module GoodData
+  module Connectors
+    module Metadata
 
-  class MetadataException < Exception
+    class MetadataException < Exception
+    end
 
+    end
   end
-
-
 end

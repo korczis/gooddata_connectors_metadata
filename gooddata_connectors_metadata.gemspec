@@ -5,7 +5,7 @@ require 'gooddata_connectors_metadata/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "gooddata_connectors_metadata"
-  spec.version       = GoodDataConnectorsMetadata::VERSION
+  spec.version       = GoodData::Connectors::Metadata::VERSION
   spec.authors       = ["Adrian Toman"]
   spec.email         = ["adrian.toman@gooddata.com"]
   spec.description   = %q{This is gem containing library for accessing gooddata connectors medatada}

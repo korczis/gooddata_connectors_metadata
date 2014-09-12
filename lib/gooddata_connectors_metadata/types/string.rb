@@ -1,9 +1,8 @@
-module GoodDataConnectorsMetadata
-
-  class StringType < BaseType
-
-
+module GoodData
+  module Connectors
+    module Metadata
+      class StringType < BaseType
+      end
+    end
   end
-
-
 end

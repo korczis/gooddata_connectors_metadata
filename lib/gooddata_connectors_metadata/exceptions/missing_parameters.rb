@@ -1,8 +1,10 @@
-module GoodDataConnectorsMetadata
+module GoodData
+  module Connectors
+    module Metadata
+    class MissingParametersException < Exception
 
-  class MissingParametersException < Exception
+    end
 
+    end
   end
-
-
 end

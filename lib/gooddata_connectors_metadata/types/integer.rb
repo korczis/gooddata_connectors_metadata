@@ -1,8 +1,11 @@
-module GoodDataConnectorsMetadata
+module GoodData
+  module Connectors
+    module Metadata
 
-  class IntegerType < BaseType
+      class IntegerType < BaseType
 
+      end
+
+    end
   end
-
-
 end
