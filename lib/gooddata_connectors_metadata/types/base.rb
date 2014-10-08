@@ -7,7 +7,6 @@ module GoodData
 
         attr_accessor :type,:size
 
-
         def initialize(input)
           if (input.instance_of? String)
             from_simple_string(input)
@@ -86,6 +85,14 @@ module GoodData
             else
               raise "Bad log file type: #{input.to_s}"
           end
+        end
+
+        def default
+          nil
+        end
+
+        def nullabble?
+          true
         end
 
 

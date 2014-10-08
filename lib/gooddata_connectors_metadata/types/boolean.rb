@@ -5,7 +5,11 @@ module GoodData
 
     class BooleanType < BaseType
 
-  end
+
+      def default
+      end
+
+    end
 
     end
   end

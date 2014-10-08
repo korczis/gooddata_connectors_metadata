@@ -80,23 +80,35 @@ module GoodData
               else
                 Runtime.fill({})
               end
-
-              hash_for_storage["updated_at"]  = Time.now.utc
-              if (!hash_for_storage["metadata"].include?("history"))
-                hash_for_storage["metadata"]["history"] = {}
-              end
-              hash_for_storage["metadata"]["history"][Runtime.get_load_id.to_s] =
-                  {
-                      "load_id" => Runtime.get_load_id,
-                      "date" => Time.now.utc,
-                      "metadata" => {
-                          "entities" => hash_for_storage["metadata"]["entities"]
-                      }
-
-                  }
-              db_collection.update({"_id" => db_key},hash_for_storage)
-              Runtime.set_load_id(Runtime.get_load_id + 1)
+            elsif (response.count == 0)
+              Runtime.fill({})
             end
+
+            response = db_collection.find({"_id" => db_key}).limit(1)
+            value = response.first
+            if(!value.nil?)
+              if (!value.include?("history"))
+                db_collection.update({"_id" => db_key},{"history" => []} )
+              end
+            end
+            response = db_collection.find({"_id" => db_key}).limit(1)
+            hash_for_storage = response.first
+            if (!hash_for_storage.nil? and hash_for_storage.include?("metadata") and hash_for_storage["metadata"].include?("entities"))
+              db_collection.update({"_id" => db_key},
+                                   {"$push" => {
+                                       "history" => {
+                                           "load_id" => Runtime.get_load_id,
+                                           "date" => Time.now.utc,
+                                           "metadata" => {
+                                               "entities" => hash_for_storage["metadata"]["entities"]
+                                           }
+                                       }
+                                   }
+                                   }
+              )
+
+            end
+            Runtime.set_load_id(Runtime.get_load_id + 1)
           end
 
 
@@ -259,6 +271,11 @@ module GoodData
 
           def get_entity_list_with_dependencies
             @entities.get_entity_list_with_dependencies
+          end
+
+
+          def now
+            @now
           end
 
 

@@ -23,7 +23,7 @@ module GoodData
             if(!args["type"].nil?)
               @type = BaseType.create(args["type"])
             else
-              @type = nil
+              @type = BaseType.create("string-255")
             end
             @custom = args["custom"] || {}
             @history = args["history"] unless (args["history"].nil?)
@@ -34,11 +34,11 @@ module GoodData
         end
 
         def <=>(obj)
-          @id <=> obj.id
+          @id.downcase <=> obj.id.downcase
         end
 
         def hash
-          @id.hash
+          @id.downcase.hash
         end
         alias eql? ==
 

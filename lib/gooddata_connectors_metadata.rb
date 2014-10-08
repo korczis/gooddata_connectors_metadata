@@ -7,7 +7,7 @@ require_relative "gooddata_connectors_metadata/metadata"
 require_relative "gooddata_connectors_metadata/runtime"
 %w(metadata_exception missing_parameters entity_exception type_exception).each {|file| require_relative "gooddata_connectors_metadata/exceptions/#{file}"}
 %w(metadata_exception missing_parameters).each {|file| require_relative "gooddata_connectors_metadata/exceptions/#{file}"}
-%w(entities entity field).each {|file| require_relative "gooddata_connectors_metadata/entity/#{file}"}
+%w(entities entity field validation).each {|file| require_relative "gooddata_connectors_metadata/entity/#{file}"}
 %w(base boolean date decimal integer string).each {|file| require_relative "gooddata_connectors_metadata/types/#{file}"}
 require_relative "gooddata_connectors_metadata/configuration/configuration"
 

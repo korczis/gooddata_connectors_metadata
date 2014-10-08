@@ -4,7 +4,7 @@ module GoodData
 
 
         class Entity
-        attr_accessor :id,:name,:custom, :fields, :type,:runtime,:dependent_on
+        attr_accessor :id,:name,:custom, :fields, :type,:runtime,:dependent_on,:validations
 
         #{
         #    "id" => "id",
@@ -22,6 +22,7 @@ module GoodData
         # hash
         def initialize(args = {})
           @fields = {}
+          @validations = {}
           if (!args["hash"].nil?)
             from_hash(args["hash"])
           elsif(!args["id"].nil?)
@@ -93,17 +94,17 @@ module GoodData
           end
         end
 
-        def field_exist?(name)
-          @fields.include?(name)
+        def field_exist?(id)
+          @fields.include?(id)
         end
 
-        def get_field(name)
-          @fields[name]
+        def get_field(id)
+          @fields[id]
         end
 
-        def delete_field(name,reason = "")
-          @fields[name].disable
-          @fields[name].custom["disable_reason"] = reason
+        def delete_field(id,reason = "")
+          @fields[id].disable
+          @fields[id].custom["disable_reason"] = reason
         end
 
 
@@ -144,6 +145,22 @@ module GoodData
           @fields.values.find_all{|v| !v.disabled?}.map{|v| v.id}
         end
 
+        def add_validation(key,type,validation)
+          if (!@validations.include?(key))
+            @validations[key] = {}
+          end
+          if (!@validations[key].include?(type))
+            @validations[key][type] = nil
+          end
+          @validations[key][type] = validation
+        end
+
+        def get_validation_by_type(key,type)
+          if (!@validations[key].nil? and @validations[key].include?(type))
+            @validations[key][type]
+          end
+        end
+
 
         def merge!(entity,enable_add = true)
           @custom.merge! entity.custom unless entity.custom.nil?
@@ -162,6 +179,7 @@ module GoodData
 
           if (enable_add)
             fields_to_add.each do |field|
+              field.custom["synchronized"] = false
               add_field(field)
             end
           end
@@ -212,9 +230,30 @@ module GoodData
           changes
         end
 
-
+        # @param [Array] folders List of folders where we should look for validations
+        # @param [String] type Type of component which requested validation listing
+        def generate_validations(folders,type)
+          pp folders
+          folders.each do |folder|
+            list_of_file = Dir["#{folder}/*.erb"]
+            @templates = {}
+            list_of_file.each do |file|
+              key = File.basename(file).split(".").first
+              # File name should be in this format type_entity.query_language.erb
+              decommission = key.split("_")
+              if (decommission.count == 2)
+                if (decommission[1] == @id)
+                  validation = Validation.new(type,file)
+                  add_validation(decommission[0],type,validation)
+                end
+              else
+                validation = Validation.new(type,file)
+                add_validation(decommission[0],type,validation)
+              end
+            end
+          end
+        end
       end
-
     end
   end
 end
