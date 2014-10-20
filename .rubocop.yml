@@ -106,7 +106,7 @@ SpaceAfterComma:
 
 SpaceAfterControlKeyword:
   Enabled: false
-  
+
 SpaceBeforeBlockBraces:
   Enabled: false
 
