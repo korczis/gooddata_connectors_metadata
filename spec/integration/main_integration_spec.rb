@@ -1,4 +1,6 @@
-require 'gooddata_connectors_metadata/metadata'
+# encoding: UTF-8
 
-describe GoodData::Connectors::Metadata do
+require 'gooddata_connectors_metadata'
+
+describe GoodData::Connectors do
 end

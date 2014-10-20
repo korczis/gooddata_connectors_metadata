@@ -1,18 +1,18 @@
+# encoding: UTF-8
+
 module GoodData
   module Connectors
     module Metadata
-
       class DateType < BaseType
-
         def to_hash
           {
-              "type" => @type,
-              "with_time" => @with_time
+            "type" => @type,
+            "with_time" => @with_time
           }
         end
 
         def to_simple_string
-           "#{@type}-#{@with_time}"
+          "#{@type}-#{@with_time}"
         end
 
         def from_simple_string(string)
@@ -39,7 +39,7 @@ module GoodData
         def with_time?
           @with_time
         end
-       end
+      end
     end
   end
 end

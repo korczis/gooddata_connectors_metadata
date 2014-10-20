@@ -1,12 +1,10 @@
+# encoding: UTF-8
+
 module GoodData
   module Connectors
     module Metadata
-
-
         class DecimalType < BaseType
-
           attr_accessor :size_before_comman,:size_after_comma
-
 
           def to_simple_string
             "#{@type}-#{@size}-#{@size_after_comma}"

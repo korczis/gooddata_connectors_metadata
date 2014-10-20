@@ -1,8 +1,8 @@
+# encoding: UTF-8
+
 module GoodData
   module Connectors
     module Metadata
-
-
         class BaseType
 
         attr_accessor :type,:size
@@ -94,12 +94,7 @@ module GoodData
         def nullabble?
           true
         end
-
-
-
       end
-
-
     end
   end
 end
