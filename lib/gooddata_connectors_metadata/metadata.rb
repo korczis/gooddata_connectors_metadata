@@ -1,10 +1,12 @@
+require 'mongo'
+
 module GoodData
   module Connectors
     module Metadata
 
         class Metadata
 
-          include Mongo
+          include ::Mongo
 
           def initialize(options = {})
             connect(options)
