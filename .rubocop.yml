@@ -1,0 +1,126 @@
+ClassLength:
+  Enabled: false
+
+CollectionMethods:
+  Enabled: false
+
+CyclomaticComplexity:
+  Enabled: false
+
+DefWithParentheses:
+  Enabled: false
+
+Documentation:
+  Enabled: false
+
+Eval:
+  Enabled: false
+
+FormatString:
+  Enabled: false
+
+HashSyntax:
+  Enabled: false
+
+LineLength:
+  Max: 323
+
+MethodLength:
+  Enabled: false
+
+# TEMP ENABLED
+AccessorMethodName:
+  Enabled: false
+
+AndOr:
+  Enabled: false
+
+Alias:
+  Enabled: false
+
+BracesAroundHashParameters:
+  Enabled: false
+
+CaseIndentation:
+  Enabled: false
+
+DeprecatedHashMethods:
+  Enabled: false
+
+EmptyLines:
+  Enabled: false
+
+EmptyLinesAroundBody:
+  Enabled: false
+
+EndAlignment:
+  Enabled: false
+
+FinalNewline:
+  Enabled: false
+
+GlobalVars:
+  Enabled: false
+
+IfUnlessModifier:
+  Enabled: false
+
+IndentationWidth:
+  Enabled: false
+
+IndentHash:
+  Enabled: false
+
+LeadingCommentSpace:
+  Enabled: false
+
+MethodCallParentheses:
+  Enabled: false
+
+MethodDefParentheses:
+  Enabled: false
+
+NegatedIf:
+  Enabled: false
+
+NonNilCheck:
+  Enabled: false
+
+OpMethod:
+  Enabled: false
+
+ParenthesesAroundCondition:
+  Enabled: false
+
+ParenthesesAsGroupedExpression:
+  Enabled: false
+
+RaiseArgs:
+  Enabled: false
+
+SpaceAfterComma:
+  Enabled: false
+
+SpaceInsideBlockBraces:
+  Enabled: false
+
+SpaceInsideHashLiteralBraces:
+  Enabled: false
+
+SpaceInsideParens:
+  Enabled: false
+
+SignalException:
+  Enabled: false
+
+StringLiterals:
+  Enabled: false
+
+StringConversionInInterpolation:
+  Enabled: false
+
+TrivialAccessors:
+  Enabled: false
+
+UselessAssignment:
+  Enabled: false
