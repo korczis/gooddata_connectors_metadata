@@ -65,6 +65,9 @@ GlobalVars:
 IfUnlessModifier:
   Enabled: false
 
+IndentationConsistency:
+  Enabled: false
+
 IndentationWidth:
   Enabled: false
 
@@ -99,6 +102,12 @@ RaiseArgs:
   Enabled: false
 
 SpaceAfterComma:
+  Enabled: false
+
+SpaceAfterControlKeyword:
+  Enabled: false
+  
+SpaceBeforeBlockBraces:
   Enabled: false
 
 SpaceInsideBlockBraces:
