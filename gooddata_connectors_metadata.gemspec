@@ -23,5 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'mongo', '~> 1.10.2'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rake-notes', '~> 0.2', '>= 0.2.0'
+  spec.add_development_dependency 'rspec', '~> 2.14', '>= 2.14.1'
   spec.add_development_dependency 'rubocop', '~> 0.20.1'
 end
