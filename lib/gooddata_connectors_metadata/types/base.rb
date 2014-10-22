@@ -9,7 +9,7 @@ module GoodData
         def initialize(input)
           if input.instance_of? String
             from_simple_string(input)
-          elsif input.instance_of? Hash or input.instance_of? (BSON::OrderedHash)
+          elsif input.instance_of?(Hash) || input.instance_of?(BSON::OrderedHash)
             from_hash(input)
           end
         end
@@ -64,7 +64,7 @@ module GoodData
           type = nil
           if input.instance_of? String
             type = input.split('-')[0]
-          elsif input.instance_of? (Hash) or input.instance_of?(BSON::OrderedHash)
+          elsif input.instance_of?(Hash) || input.instance_of?(BSON::OrderedHash)
             type = input['type']
           end
           case type

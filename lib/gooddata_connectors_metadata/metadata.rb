@@ -24,7 +24,7 @@ module GoodData
         # This method should be called from client, anytime the metadata (global) are changed
         def store_global_hash(options = {})
           db_collection_param = options['db_collection'] || 'default'
-          fail MetadataException, 'You have not specified the database collection' if db_collection_param.nil? or db_collection_param.empty?
+          fail MetadataException, 'You have not specified the database collection' if db_collection_param.nil? || db_collection_param.empty?
           db_collection = @db[db_collection_param]
           fail MetadataExpcetion, 'The schedule_id is null, cannot generate database key' if $SCHEDULE_ID.nil?
           db_key = $SCHEDULE_ID
@@ -50,7 +50,7 @@ module GoodData
         # # This method should be called from client, anytime the metadata (per execution) are changed
         # def store_hash(schedule_id, execution_id, options = {})
         #   db_collection_param = options["db_collection"] || "default"
-        #   fail MetadataException, "You have not specified the database collection" if db_collection_param.nil? or db_collection_param.empty?
+        #   fail MetadataException, "You have not specified the database collection" if db_collection_param.nil? || db_collection_param.empty?
         #   db_collection = @db[db_collection_param]
         #   db_key = generate_key(schedule_id, execution_id)
         #   record = db_collection.find({"_id" => db_key}).limit(1)
@@ -68,7 +68,7 @@ module GoodData
         # This method is called at metadata initialization time and it will load metadata (global) from metadata storage
         def load_global_hash(options = {})
           db_collection_param = options['db_collection'] || 'default'
-          fail MetadataException, 'You have not specified the database collection' if db_collection_param.nil? or db_collection_param.empty?
+          fail MetadataException, 'You have not specified the database collection' if db_collection_param.nil? || db_collection_param.empty?
           db_collection = @db[db_collection_param]
           db_key = $SCHEDULE_ID
           response = db_collection.find('_id' => db_key).limit(1)
@@ -116,7 +116,7 @@ module GoodData
         # # This method is called at metadata initialization time and it will load metadata (global) from metadata storage
         # def load_hash(schedule_id, execution_id, options={})
         #   db_collection_param = options["db_collection"] || "default"
-        #   fail MetadataException, "You have not specified the database collection" if db_collection_param.nil? or db_collection_param.empty?
+        #   fail MetadataException, "You have not specified the database collection" if db_collection_param.nil? || db_collection_param.empty?
         #   db_collection = @db[db_collection_param]
         #   db_key = generate_key(schedule_id, execution_id)
         #   response = db_collection.find(:_id => db_key)
@@ -293,7 +293,7 @@ module GoodData
 
         # Generation of key, which is used to store metadata in metadata storage
         def generate_key(schedule_id, execution_id, options = {})
-          fail MetadataExpcetion, 'The schedule_id or execution_id are null, cannot generate database key' if schedule_id.nil? or execution_id.nil?
+          fail MetadataExpcetion, 'The schedule_id or execution_id are null, cannot generate database key' if schedule_id.nil? || execution_id.nil?
           "#{schedule_id}-#{execution_id}"
         end
 

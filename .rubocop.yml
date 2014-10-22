@@ -33,7 +33,7 @@ AccessorMethodName:
   Enabled: false
 
 AndOr:
-  Enabled: false
+  Enabled: true
 
 Alias:
   Enabled: false

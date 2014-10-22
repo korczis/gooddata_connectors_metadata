@@ -82,7 +82,7 @@ module GoodData
               #  ]
               if field_element.instance_of?(String)
                 field = Field.new('id' => field_element)
-              elsif field_element.instance_of?(Hash) or field_element.instance_of?(BSON::OrderedHash)
+              elsif field_element.instance_of?(Hash) || field_element.instance_of?(BSON::OrderedHash)
                 field = Field.new('hash' => field_element)
               else
                 fail MetadataException, 'Wrong parsing of field'
