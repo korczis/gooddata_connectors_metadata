@@ -28,7 +28,7 @@ module GoodData
           db_collection = @db[db_collection_param]
           raise MetadataExpcetion, "The schedule_id is null, cannot generate database key" if $SCHEDULE_ID.nil?
           db_key = $SCHEDULE_ID
-          record = db_collection.find({"_id" => db_key}).limit(1)
+          record = db_collection.find('_id' => db_key).limit(1)
           if (record.count == 0)
             metadata_hash = {
               "entities" => @entities.to_hash,
@@ -71,7 +71,7 @@ module GoodData
           raise MetadataException, "You have not specified the database collection" if db_collection_param.nil? or db_collection_param.empty?
           db_collection = @db[db_collection_param]
           db_key = $SCHEDULE_ID
-          response = db_collection.find({"_id" => db_key}).limit(1)
+          response = db_collection.find('_id' => db_key).limit(1)
           raise MetadataException, "The response from database has returned more than one record. Critical error please contact administrator" if response.count > 1
           if (response.count == 1)
             hash_for_storage = response.first
@@ -86,14 +86,14 @@ module GoodData
             Runtime.fill({})
           end
 
-          response = db_collection.find({"_id" => db_key}).limit(1)
+          response = db_collection.find('_id' => db_key).limit(1)
           value = response.first
           if (!value.nil?)
             if (!value.include?("history"))
               db_collection.update({"_id" => db_key}, {"history" => []})
             end
           end
-          response = db_collection.find({"_id" => db_key}).limit(1)
+          response = db_collection.find('_id' => db_key).limit(1)
           hash_for_storage = response.first
           if (!hash_for_storage.nil? and hash_for_storage.include?("metadata") and hash_for_storage["metadata"].include?("entities"))
             db_collection.update({"_id" => db_key},
@@ -192,7 +192,7 @@ module GoodData
                   entity_hash["custom"] = {"load_fields_from_source_system" => true}
                 end
               end
-              entity_hash.merge!({"id" => entity_name}) unless entity_hash.include?("id")
+              entity_hash.merge!('id' => entity_name) unless entity_hash.include?("id")
 
               if @entities.include?(entity_name)
                 entity = @entities[entity_name]
@@ -234,7 +234,7 @@ module GoodData
                   entity_hash["custom"] = {"load_fields_from_source_system" => true}
                 end
               end
-              entity_hash.merge!({"id" => entity_name}) unless entity_hash.include?("id")
+              entity_hash.merge!('id' => entity_name) unless entity_hash.include?("id")
 
               if @entities.include?(entity_name)
                 entity = @entities[entity_name]

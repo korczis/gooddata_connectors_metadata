@@ -39,7 +39,7 @@ Alias:
   Enabled: false
 
 BracesAroundHashParameters:
-  Enabled: false
+  Enabled: true
 
 CaseIndentation:
   Enabled: false

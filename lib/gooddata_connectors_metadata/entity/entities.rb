@@ -9,7 +9,7 @@ module GoodData
           @entities = {}
           if (!args.empty? and args.include?("hash"))
             args["hash"].each do |entity_hash|
-              entity = Entity.new({"hash" => entity_hash})
+              entity = Entity.new('hash' => entity_hash)
               @entities[entity.id] = entity
             end
           end
@@ -37,7 +37,7 @@ module GoodData
               @entities[input_entity.id].merge! (input_entity)
             end
           elsif input_entity.instance_of?(Hash)
-            entity = Entity.new({ "hash" => input_entity})
+            entity = Entity.new('hash' => input_entity)
             if (!@entities.include?(entity.id))
               @entities[entity.id] = entity
             else

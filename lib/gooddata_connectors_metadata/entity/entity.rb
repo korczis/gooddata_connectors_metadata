@@ -81,9 +81,9 @@ module GoodData
               #  {"id" => "Stage","type" => "string-10"}
               #  ]
               if field_element.instance_of?(String)
-                field = Field.new({"id" => field_element})
+                field = Field.new('id' => field_element)
               elsif ((field_element.instance_of?(Hash) or field_element.instance_of?(BSON::OrderedHash)) and (field_element.include?("id")))
-                field = Field.new({"hash" => field_element})
+                field = Field.new('hash' => field_element)
               else
                 raise MetadataException, "Wrong parsing of field"
               end
@@ -112,9 +112,9 @@ module GoodData
 
         def add_field(input)
           if (input.instance_of?(String))
-            field = Field.new({"id" => input})
+            field = Field.new('id' => input)
           elsif (input.instance_of?(Hash))
-            field = Field.new({"hash" => input})
+            field = Field.new('hash' => input)
           elsif (input.instance_of?(Field))
             field = input
           end
