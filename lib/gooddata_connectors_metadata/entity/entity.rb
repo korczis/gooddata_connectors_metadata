@@ -1,12 +1,10 @@
 module GoodData
   module Connectors
     module Metadata
+      class Entity
+        attr_accessor :id, :name, :custom, :fields, :type, :runtime, :dependent_on, :validations
 
-
-        class Entity
-        attr_accessor :id,:name,:custom, :fields, :type,:runtime,:dependent_on,:validations
-
-        #{
+        # {
         #    "id" => "id",
         #    "name" => "name",
         #    "type" => "type",
@@ -14,7 +12,7 @@ module GoodData
         #        "test1" => "value"
         #        etc
         #    }
-        #}
+        # }
 
 
         # Requesting id, name, type (optional custom)
@@ -25,7 +23,7 @@ module GoodData
           @validations = {}
           if (!args["hash"].nil?)
             from_hash(args["hash"])
-          elsif(!args["id"].nil?)
+          elsif (!args["id"].nil?)
             @id = args["id"]
             @name = args["name"] || args["id"]
             @history = args["history"] || {}
@@ -33,7 +31,7 @@ module GoodData
             @enabled = args["enabled"] || true
             @type = args["type"] || "input|output"
             @runtime = args["runtime"] || {}
-            @dependent_on  = args["dependent_on"] || nil
+            @dependent_on = args["dependent_on"] || nil
             unless (args["fields"].nil?)
               args["fields"].each do |field|
                 add_field(field)
@@ -51,15 +49,15 @@ module GoodData
 
         def to_hash
           {
-              "id" => @id,
-              "name" => @name,
-              "custom" => @custom,
-              "fields" => @fields.map {|k,v| v.to_hash},
-              "history" => @history,
-              "enabled" => @enabled,
-              "type" => @type,
-              "runtime" => @runtime,
-              "dependent_on"  => @dependent_on
+            "id" => @id,
+            "name" => @name,
+            "custom" => @custom,
+            "fields" => @fields.map { |k, v| v.to_hash },
+            "history" => @history,
+            "enabled" => @enabled,
+            "type" => @type,
+            "runtime" => @runtime,
+            "dependent_on" => @dependent_on
           }
         end
 
@@ -102,14 +100,14 @@ module GoodData
           @fields[id]
         end
 
-        def delete_field(id,reason = "")
+        def delete_field(id, reason = "")
           @fields[id].disable
           @fields[id].custom["disable_reason"] = reason
         end
 
 
         def get_ids
-          fields.map {|f| f.id}
+          fields.map { |f| f.id }
         end
 
         def add_field(input)
@@ -142,10 +140,10 @@ module GoodData
 
 
         def get_enabled_fields
-          @fields.values.find_all{|v| !v.disabled?}.map{|v| v.id}
+          @fields.values.find_all { |v| !v.disabled? }.map { |v| v.id }
         end
 
-        def add_validation(key,type,validation)
+        def add_validation(key, type, validation)
           if (!@validations.include?(key))
             @validations[key] = {}
           end
@@ -155,14 +153,14 @@ module GoodData
           @validations[key][type] = validation
         end
 
-        def get_validation_by_type(key,type)
+        def get_validation_by_type(key, type)
           if (!@validations[key].nil? and @validations[key].include?(type))
             @validations[key][type]
           end
         end
 
 
-        def merge!(entity,enable_add = true)
+        def merge!(entity, enable_add = true)
           @custom.merge! entity.custom unless entity.custom.nil?
           @name = entity.name unless entity.name.nil?
           @dependent_on = entity.dependent_on unless entity.dependent_on.nil?
@@ -185,7 +183,7 @@ module GoodData
           end
 
           fields_to_merge.each do |field|
-            field.merge!(entity.get_field(field.id),enable_add)
+            field.merge!(entity.get_field(field.id), enable_add)
           end
         end
 
@@ -198,10 +196,10 @@ module GoodData
         # IT will return the changes in hash
         def diff(entity)
           changes = {}
-          changes["name"] = {"source" => @name ,"target" => entity.name } if @name.downcase != entity.name.downcase
-          changes["disabled"] = {"source" => disabled? ,"target" => entity.disabled? } if disabled? != entity.disabled?
-          changes["type"] = {"source" => @type ,"target" => entity.type } if (@type.split("|") & entity.type.split("|")).count != @type.split("|").count
-          changes["dependent_on"] = {"source" => @dependent_on ,"target" => entity.dependent_on } if @dependent_on != entity.dependent_on
+          changes["name"] = {"source" => @name, "target" => entity.name} if @name.downcase != entity.name.downcase
+          changes["disabled"] = {"source" => disabled?, "target" => entity.disabled?} if disabled? != entity.disabled?
+          changes["type"] = {"source" => @type, "target" => entity.type} if (@type.split("|") & entity.type.split("|")).count != @type.split("|").count
+          changes["dependent_on"] = {"source" => @dependent_on, "target" => entity.dependent_on} if @dependent_on != entity.dependent_on
           changes["fields"] = {}
           changes["fields"]["only_in_source"] = []
           changes["fields"]["only_in_target"] = []
@@ -221,9 +219,9 @@ module GoodData
           fields_in_both_collections.each do |field|
             target_field = entity.get_field(field.id)
             hash = {}
-            hash["name"] = {"source" => field.name,"target" => target_field.name} if field.name.downcase != target_field.name.downcase
-            hash["type"] = {"source" => field.type,"target" => target_field.type} if field.type != target_field.type
-            hash["disabled"] = {"source" => field.disabled?,"target" => target_field.disabled?} if field.disabled? != target_field.disabled?
+            hash["name"] = {"source" => field.name, "target" => target_field.name} if field.name.downcase != target_field.name.downcase
+            hash["type"] = {"source" => field.type, "target" => target_field.type} if field.type != target_field.type
+            hash["disabled"] = {"source" => field.disabled?, "target" => target_field.disabled?} if field.disabled? != target_field.disabled?
             hash["field"] = field if !hash.empty?
             changes["fields"]["changed"] << hash if !hash.empty?
           end
@@ -232,7 +230,7 @@ module GoodData
 
         # @param [Array] folders List of folders where we should look for validations
         # @param [String] type Type of component which requested validation listing
-        def generate_validations(folders,type)
+        def generate_validations(folders, type)
           pp folders
           folders.each do |folder|
             list_of_file = Dir["#{folder}/*.erb"]
@@ -243,12 +241,12 @@ module GoodData
               decommission = key.split("_")
               if (decommission.count == 2)
                 if (decommission[1] == @id)
-                  validation = Validation.new(type,file)
-                  add_validation(decommission[0],type,validation)
+                  validation = Validation.new(type, file)
+                  add_validation(decommission[0], type, validation)
                 end
               else
-                validation = Validation.new(type,file)
-                add_validation(decommission[0],type,validation)
+                validation = Validation.new(type, file)
+                add_validation(decommission[0], type, validation)
               end
             end
           end

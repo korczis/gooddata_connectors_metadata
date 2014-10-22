@@ -58,7 +58,7 @@ EndAlignment:
 
 Encoding:
   Enabled: false
-  
+
 FinalNewline:
   Enabled: false
 
@@ -78,7 +78,7 @@ IndentHash:
   Enabled: false
 
 LeadingCommentSpace:
-  Enabled: false
+  Enabled: true
 
 MethodCallParentheses:
   Enabled: false

@@ -21,7 +21,7 @@ module GoodData
 
           $log.info "Initilizing metadata storage"
           metadata = Metadata.new(params)
-          #This section will handle default metadata load
+          # This section will handle default metadata load
 
           raise MetadataException, "The variable LOAD_ID is not present in metadata initialization call" if params["LOAD_ID"].nil?
           raise MetadataException, "The variable SCHEDULE_ID is not present in metadata initialization call" if params["SCHEDULE_ID"].nil?
