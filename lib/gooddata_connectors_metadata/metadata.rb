@@ -131,9 +131,9 @@ module GoodData
           $log.info 'Starting mandatory fields check'
           missing_fields = {}
           mandatory_parameters.each_pair do |key, value|
-            if @hash['configuration'].has_key?(key)
+            if @hash['configuration'].key?(key)
               value.each do |field|
-                if !@hash['configuration'][key].has_key?(field)
+                if !@hash['configuration'][key].key?(field)
                   missing_fields[key] = [] if missing_fields[key].nil?
                   missing_fields[key] << field
                 end
@@ -151,14 +151,14 @@ module GoodData
         end
 
         def get_configuration_by_type(type)
-          if @hash['configuration'].has_key?(type)
+          if @hash['configuration'].key?(type)
             @hash['configuration'][type]
           end
         end
 
         def get_configuration_by_type_and_key(type, key)
           if @hash['configuration'].include?(type)
-            if @hash['configuration'][type].has_key?(key)
+            if @hash['configuration'][type].key?(key)
               @hash['configuration'][type][key]
             end
           end
@@ -167,7 +167,7 @@ module GoodData
 
         def merge_default_configuration(default_configuration)
           @hash['configuration'].each_pair do |k, v|
-            if default_configuration.has_key?(k)
+            if default_configuration.key?(k)
               configuration_level = v
               default_level = default_configuration[k]
               compare_level_of_hash(configuration_level, default_level)
@@ -313,7 +313,7 @@ module GoodData
         def compare_level_of_hash(source, target)
           target.each_pair do |k, v|
             if v.instance_of?(Array)
-              if !source.has_key?(k)
+              if !source.key?(k)
                 source[k] = v
               else
                 if source[k].instance_of?(Array)
@@ -321,7 +321,7 @@ module GoodData
                 end
               end
             elsif v.instance_of?(Hash)
-              if source.has_key?(k)
+              if source.key?(k)
                 if source[k].instance_of?(Hash)
                   compare_level_of_hash(source[k], v)
                 end
@@ -329,7 +329,7 @@ module GoodData
                 source[k] = v
               end
             else
-              if !source.has_key?(k)
+              if !source.key?(k)
                 source[k] = v
               end
             end

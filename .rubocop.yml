@@ -45,7 +45,7 @@ CaseIndentation:
   Enabled: false
 
 DeprecatedHashMethods:
-  Enabled: false
+  Enabled: true
 
 EmptyLines:
   Enabled: false
