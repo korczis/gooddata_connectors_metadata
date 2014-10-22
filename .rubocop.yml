@@ -56,6 +56,9 @@ EmptyLinesAroundBody:
 EndAlignment:
   Enabled: false
 
+Encoding:
+  Enabled: false
+  
 FinalNewline:
   Enabled: false
 
