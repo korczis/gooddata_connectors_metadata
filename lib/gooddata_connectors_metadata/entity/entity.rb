@@ -16,7 +16,6 @@ module GoodData
         #    }
         # }
 
-
         # Requesting id, name, type (optional custom)
         # or
         # hash
@@ -43,7 +42,6 @@ module GoodData
             fail EntityException, 'Missing mandatory parameters when creating entity, mandatory fields are id,name,type or hash'
           end
         end
-
 
         def ==(entity)
           @id == entity.id
@@ -107,7 +105,6 @@ module GoodData
           @fields[id].custom['disable_reason'] = reason
         end
 
-
         def get_ids
           fields.map { |f| f.id }
         end
@@ -140,7 +137,6 @@ module GoodData
           @type =~ /output/
         end
 
-
         def get_enabled_fields
           @fields.values.find_all { |v| !v.disabled? }.map { |v| v.id }
         end
@@ -160,7 +156,6 @@ module GoodData
             @validations[key][type]
           end
         end
-
 
         def merge!(entity, enable_add = true)
           @custom.merge! entity.custom unless entity.custom.nil?
@@ -188,7 +183,6 @@ module GoodData
             field.merge!(entity.get_field(field.id), enable_add)
           end
         end
-
 
         # This method with compare two entities.(It is done from perpective of first entity - entity on which the diff command is called)
         # It is currently comparing

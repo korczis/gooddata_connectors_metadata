@@ -115,7 +115,6 @@ module GoodData
           Runtime.set_load_id(Runtime.get_load_id + 1)
         end
 
-
         # # This method is called at metadata initialization time and it will load metadata (global) from metadata storage
         # def load_hash(schedule_id, execution_id, options={})
         #   db_collection_param = options["db_collection"] || "default"
@@ -164,7 +163,6 @@ module GoodData
           end
         end
 
-
         def merge_default_configuration(default_configuration)
           @hash['configuration'].each_pair do |k, v|
             if default_configuration.key?(k)
@@ -174,7 +172,6 @@ module GoodData
             end
           end
         end
-
 
         # Add entities from configuration file to global_entities storage (merging)
         # Configuration is top most priority when merging
@@ -215,7 +212,6 @@ module GoodData
 
         end
 
-
         # Lets add default entities, wchich should be donwloaded by downloader
         # THis entities are added to entities list in metadata storage
         def add_default_entities(default_entities)
@@ -255,7 +251,6 @@ module GoodData
           end
         end
 
-
         def get_entity(entity)
           @entities[entity]
         end
@@ -272,16 +267,13 @@ module GoodData
           @entities.get_entity_list_with_dependencies
         end
 
-
         def now
           @now
         end
 
-
         def print_hash
           pp @hash
         end
-
 
         private
 
@@ -307,7 +299,6 @@ module GoodData
           fail MetadataExpcetion, 'The schedule_id or execution_id are null, cannot generate database key' if schedule_id.nil? or execution_id.nil?
           "#{schedule_id}-#{execution_id}"
         end
-
 
         # This method is merging the client configuration with default compoment configuration
         def compare_level_of_hash(source, target)

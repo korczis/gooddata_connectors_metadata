@@ -17,7 +17,6 @@ module GoodData
           end
         end
 
-
         def [](id)
           @entities[id]
         end
@@ -25,7 +24,6 @@ module GoodData
         def each(&block)
           @entities.values.each(&block)
         end
-
 
         def include?(id)
           @entities.include?(id)
@@ -49,7 +47,6 @@ module GoodData
             fail EntityException, 'Unsuported type of input object. Supported types Hash,Entity'
           end
         end
-
 
         def get_entity_names
           @entities.keys

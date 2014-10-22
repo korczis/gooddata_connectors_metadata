@@ -44,14 +44,12 @@ module GoodData
             end
           end
 
-
           def to_hash
             {
               'global' => @global,
               'entity' => @entity
             }
           end
-
 
           def get_load_id
             if !@global.nil?

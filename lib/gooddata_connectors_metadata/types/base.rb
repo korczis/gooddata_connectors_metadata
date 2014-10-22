@@ -15,7 +15,6 @@ module GoodData
           end
         end
 
-
         def ==(obj)
           to_simple_string == obj.to_simple_string
         end
@@ -37,7 +36,6 @@ module GoodData
             @size = 0
           end
         end
-
 
         def to_hash
           if @size > 0
@@ -62,7 +60,6 @@ module GoodData
             @size = hash['size']
           end
         end
-
 
         def self.create input
           type = nil

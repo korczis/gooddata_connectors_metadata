@@ -48,7 +48,7 @@ DeprecatedHashMethods:
   Enabled: true
 
 EmptyLines:
-  Enabled: false
+  Enabled: true
 
 EmptyLinesAroundBody:
   Enabled: false

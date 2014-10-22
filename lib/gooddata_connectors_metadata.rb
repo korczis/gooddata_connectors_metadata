@@ -38,7 +38,6 @@ module GoodData
           # TODO: Eliminate $SCHEDULE_ID global variable
           $SCHEDULE_ID = params['SCHEDULE_ID']
 
-
           # TODO: Eliminate $LOAD_ID global variable
           $LOAD_ID = params['LOAD_ID']
           if !$SCHEDULE_ID.nil?
