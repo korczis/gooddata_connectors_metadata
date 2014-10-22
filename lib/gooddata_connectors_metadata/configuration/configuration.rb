@@ -32,7 +32,6 @@ module GoodData
           end
 
           def load_from_password_manager()
-
           end
         end
       end

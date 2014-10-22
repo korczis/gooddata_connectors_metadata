@@ -5,9 +5,7 @@ require 'mongo'
 module GoodData
   module Connectors
     module Metadata
-
       class Metadata
-
         include ::Mongo
 
         def initialize(options = {})
@@ -209,7 +207,6 @@ module GoodData
               @entities[entity_to_disable].disable('Override by user config') unless @entities[entity_to_disable].disabled?
             end
           end
-
         end
 
         # Lets add default entities, wchich should be donwloaded by downloader

@@ -3,7 +3,6 @@
 module GoodData
   module Connectors
     module Metadata
-
       class Entities
         include Enumerable
 
@@ -76,7 +75,6 @@ module GoodData
           end
           dependency_tree
         end
-
       end
     end
   end

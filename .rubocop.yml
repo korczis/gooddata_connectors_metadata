@@ -51,7 +51,7 @@ EmptyLines:
   Enabled: true
 
 EmptyLinesAroundBody:
-  Enabled: false
+  Enabled: true
 
 EndAlignment:
   Enabled: false

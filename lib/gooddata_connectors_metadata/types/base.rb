@@ -3,9 +3,8 @@
 module GoodData
   module Connectors
     module Metadata
-        class BaseType
-
-        attr_accessor :type,:size
+      class BaseType
+        attr_accessor :type, :size
 
         def initialize(input)
           if input.instance_of? String
@@ -40,12 +39,12 @@ module GoodData
         def to_hash
           if @size > 0
             {
-                'type' => @type,
-                'size' => @size
+              'type' => @type,
+              'size' => @size
             }
           else
             {
-                'type' => @type
+              'type' => @type
             }
           end
         end
@@ -69,18 +68,18 @@ module GoodData
             type = input['type']
           end
           case type
-          when 'date'
-            DateType.new(input)
-          when 'boolean'
-            BooleanType.new(input)
-          when 'decimal'
-            DecimalType.new(input)
-          when 'integer'
-            IntegerType.new(input)
-          when 'string'
-            StringType.new(input)
-          else
-            fail ArgumentError, "Bad log file type: #{input.to_s}"
+            when 'date'
+              DateType.new(input)
+            when 'boolean'
+              BooleanType.new(input)
+            when 'decimal'
+              DecimalType.new(input)
+            when 'integer'
+              IntegerType.new(input)
+            when 'string'
+              StringType.new(input)
+            else
+              fail ArgumentError, "Bad log file type: #{input.to_s}"
           end
         end
 
