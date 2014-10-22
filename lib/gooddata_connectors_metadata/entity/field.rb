@@ -13,21 +13,21 @@ module GoodData
         # hash
         def initialize(args = {})
           @enabled = true
-          if (!args["hash"].nil?)
-            from_hash(args["hash"])
-          elsif (!args["id"].nil?)
-            @id = args["id"]
-            @name = args["name"] || args["id"]
-            if (!args["type"].nil?)
-              @type = BaseType.create(args["type"])
+          if !args['hash'].nil?
+            from_hash(args['hash'])
+          elsif !args['id'].nil?
+            @id = args['id']
+            @name = args['name'] || args['id']
+            if !args['type'].nil?
+              @type = BaseType.create(args['type'])
             else
-              @type = BaseType.create("string-255")
+              @type = BaseType.create('string-255')
             end
-            @custom = args["custom"] || {}
-            @history = args["history"] unless (args["history"].nil?)
-            @enabled = args["enabled"] || true
+            @custom = args['custom'] || {}
+            @history = args['history'] unless (args['history'].nil?)
+            @enabled = args['enabled'] || true
           else
-            raise EntityException, "Missing mandatory parameters when creating fields, mandatory fields are id,name,type or hash"
+            fail EntityException, 'Missing mandatory parameters when creating fields, mandatory fields are id,name,type or hash'
           end
         end
 
@@ -43,27 +43,27 @@ module GoodData
 
         def to_hash
           {
-            "id" => @id,
-            "name" => @name,
-            "type" => @type.to_simple_string,
-            "custom" => @custom,
-            "history" => @history,
-            "enabled" => @enabled
+            'id' => @id,
+            'name' => @name,
+            'type' => @type.to_simple_string,
+            'custom' => @custom,
+            'history' => @history,
+            'enabled' => @enabled
           }
         end
 
         def from_hash(hash)
-          @id = hash["id"]
-          @name = hash["name"]
-          @type = BaseType.create(hash["type"])
-          @custom = hash["custom"] || {}
-          @history = hash["history"] unless hash["history"].nil?
-          @enabled = hash["enabled"] || true
+          @id = hash['id']
+          @name = hash['name']
+          @type = BaseType.create(hash['type'])
+          @custom = hash['custom'] || {}
+          @history = hash['history'] unless hash['history'].nil?
+          @enabled = hash['enabled'] || true
         end
 
-        def disable(reason = "")
+        def disable(reason = '')
           @enabled = false
-          @custom["disable_reason"] = reason
+          @custom['disable_reason'] = reason
         end
 
         def disabled?

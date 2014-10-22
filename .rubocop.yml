@@ -39,7 +39,7 @@ Alias:
   Enabled: false
 
 BracesAroundHashParameters:
-  Enabled: false
+  Enabled: true
 
 CaseIndentation:
   Enabled: false
@@ -54,6 +54,9 @@ EmptyLinesAroundBody:
   Enabled: false
 
 EndAlignment:
+  Enabled: false
+
+Encoding:
   Enabled: false
 
 FinalNewline:
@@ -75,7 +78,7 @@ IndentHash:
   Enabled: false
 
 LeadingCommentSpace:
-  Enabled: false
+  Enabled: true
 
 MethodCallParentheses:
   Enabled: false

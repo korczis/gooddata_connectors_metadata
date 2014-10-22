@@ -26,21 +26,21 @@ module GoodData
     module Metadata
       class MetadataMiddleware < Bricks::Middleware
         def call(params)
-          $log = params["GDC_LOGGER"]
+          $log = params['GDC_LOGGER']
 
-          $log.info "Initilizing metadata storage"
+          $log.info 'Initilizing metadata storage'
           metadata = Metadata.new(params)
-          #This section will handle default metadata load
+          # This section will handle default metadata load
 
-          raise MetadataException, "The variable LOAD_ID is not present in metadata initialization call" if params["LOAD_ID"].nil?
-          raise MetadataException, "The variable SCHEDULE_ID is not present in metadata initialization call" if params["SCHEDULE_ID"].nil?
+          fail MetadataException, 'The variable LOAD_ID is not present in metadata initialization call' if params['LOAD_ID'].nil?
+          fail MetadataException, 'The variable SCHEDULE_ID is not present in metadata initialization call' if params['SCHEDULE_ID'].nil?
 
           # TODO: Eliminate $SCHEDULE_ID global variable
-          $SCHEDULE_ID = params["SCHEDULE_ID"]
+          $SCHEDULE_ID = params['SCHEDULE_ID']
 
 
           # TODO: Eliminate $LOAD_ID global variable
-          $LOAD_ID = params["LOAD_ID"]
+          $LOAD_ID = params['LOAD_ID']
           if !$SCHEDULE_ID.nil?
             $log.info "Loading global metadata for schedule #{$SCHEDULE_ID}"
             metadata.load_global_hash($SCHEDULE_ID)

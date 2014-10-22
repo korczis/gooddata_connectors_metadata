@@ -6,8 +6,8 @@ module GoodData
       class DateType < BaseType
         def to_hash
           {
-            "type" => @type,
-            "with_time" => @with_time
+            'type' => @type,
+            'with_time' => @with_time
           }
         end
 
@@ -16,24 +16,24 @@ module GoodData
         end
 
         def from_simple_string(string)
-          values = string.split("-")
+          values = string.split('-')
           @type = values[0]
           @with_time = to_bool(values[1])
         end
 
         def to_bool(value)
           return true if value =~ (/^(true|t|yes|y|1)$/i)
-          return false if value == "" || value =~ (/^(false|f|no|n|0)$/i)
-          raise TypeException.new "Invalid value for boolean conversion: #{value}"
+          return false if value == '' || value =~ (/^(false|f|no|n|0)$/i)
+          fail TypeException, "Invalid value for boolean conversion: #{value}"
         end
 
         def from_hash(hash)
-          if (hash.include?("type"))
-            @type = hash["type"]
+          if hash.include?('type')
+            @type = hash['type']
           else
-            raise TypeException, "Some of the mandatory parameter for date type are missing"
+            fail TypeException, 'Some of the mandatory parameter for date type are missing'
           end
-          @with_time = hash["with_time"] || false
+          @with_time = hash['with_time'] || false
         end
 
         def with_time?

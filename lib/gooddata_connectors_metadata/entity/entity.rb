@@ -6,7 +6,7 @@ module GoodData
       class Entity
         attr_accessor :id, :name, :custom, :fields, :type, :runtime, :dependent_on, :validations
 
-        #{
+        # {
         #    "id" => "id",
         #    "name" => "name",
         #    "type" => "type",
@@ -14,7 +14,7 @@ module GoodData
         #        "test1" => "value"
         #        etc
         #    }
-        #}
+        # }
 
 
         # Requesting id, name, type (optional custom)
@@ -23,9 +23,9 @@ module GoodData
         def initialize(args = {})
           @fields = {}
           @validations = {}
-          if (!args['hash'].nil?)
+          if !args['hash'].nil?
             from_hash(args['hash'])
-          elsif (!args['id'].nil?)
+          elsif !args['id'].nil?
             @id = args['id']
             @name = args['name'] || args['id']
             @history = args['history'] || {}
@@ -34,15 +34,16 @@ module GoodData
             @type = args['type'] || 'input|output'
             @runtime = args['runtime'] || {}
             @dependent_on = args['dependent_on'] || nil
-            unless (args['fields'].nil?)
+            unless args['fields'].nil?
               args['fields'].each do |field|
                 add_field(field)
               end
             end
           else
-            raise EntityException, 'Missing mandatory parameters when creating entity, mandatory fields are id, name, type or hash'
+            fail EntityException, 'Missing mandatory parameters when creating entity, mandatory fields are id,name,type or hash'
           end
         end
+
 
         def ==(entity)
           @id == entity.id
@@ -71,7 +72,7 @@ module GoodData
           @type = hash['type'] || 'input|output'
           @runtime = hash['runtime'] || {}
           @dependent_on = hash['dependent_on'] || nil
-          unless (hash['fields'].nil?)
+          unless hash['fields'].nil?
             hash['fields'].each do |field_element|
               # Lets process the fields from the configuration file
               # The fields could be in form of Array or in form of HASH with type
@@ -82,11 +83,11 @@ module GoodData
               #  {"id" => "Stage","type" => "string-10"}
               #  ]
               if field_element.instance_of?(String)
-                field = Field.new({'id' => field_element})
-              elsif ((field_element.instance_of?(Hash) or field_element.instance_of?(BSON::OrderedHash)) and (field_element.include?("id")))
-                field = Field.new({'hash' => field_element})
+                field = Field.new('id' => field_element)
+              elsif field_element.instance_of?(Hash) or field_element.instance_of?(BSON::OrderedHash)
+                field = Field.new('hash' => field_element)
               else
-                raise MetadataException, 'Wrong parsing of field'
+                fail MetadataException, 'Wrong parsing of field'
               end
               @fields[field.id] = field
             end
@@ -101,7 +102,7 @@ module GoodData
           @fields[id]
         end
 
-        def delete_field(id, reason = "")
+        def delete_field(id, reason = '')
           @fields[id].disable
           @fields[id].custom['disable_reason'] = reason
         end
@@ -112,11 +113,11 @@ module GoodData
         end
 
         def add_field(input)
-          if (input.instance_of?(String))
-            field = Field.new({'id' => input})
-          elsif (input.instance_of?(Hash))
-            field = Field.new({'hash' => input})
-          elsif (input.instance_of?(Field))
+          if input.instance_of?(String)
+            field = Field.new('id' => input)
+          elsif input.instance_of?(Hash)
+            field = Field.new('hash' => input)
+          elsif input.instance_of?(Field)
             field = input
           end
           @fields[field.id] = field
@@ -139,22 +140,23 @@ module GoodData
           @type =~ /output/
         end
 
+
         def get_enabled_fields
           @fields.values.find_all { |v| !v.disabled? }.map { |v| v.id }
         end
 
         def add_validation(key, type, validation)
-          if (!@validations.include?(key))
+          if !@validations.include?(key)
             @validations[key] = {}
           end
-          if (!@validations[key].include?(type))
+          if !@validations[key].include?(type)
             @validations[key][type] = nil
           end
           @validations[key][type] = validation
         end
 
         def get_validation_by_type(key, type)
-          if (!@validations[key].nil? and @validations[key].include?(type))
+          if !@validations[key].nil? && @validations[key].include?(type)
             @validations[key][type]
           end
         end
@@ -169,13 +171,13 @@ module GoodData
           fields_to_add = entity.fields.values - @fields.values
           fields_to_merge = @fields.values & entity.fields.values
 
-          if (!entity.fields.values.empty?)
+          if !entity.fields.values.empty?
             fields_to_disable.each do |field|
               field.disable('from merge')
             end
           end
 
-          if (enable_add)
+          if enable_add
             fields_to_add.each do |field|
               field.custom['synchronized'] = false
               add_field(field)
@@ -236,11 +238,11 @@ module GoodData
             list_of_file = Dir["#{folder}/*.erb"]
             @templates = {}
             list_of_file.each do |file|
-              key = File.basename(file).split(".").first
+              key = File.basename(file).split('.').first
               # File name should be in this format type_entity.query_language.erb
-              decommission = key.split("_")
-              if (decommission.count == 2)
-                if (decommission[1] == @id)
+              decommission = key.split('_')
+              if decommission.count == 2
+                if decommission[1] == @id
                   validation = Validation.new(type, file)
                   add_validation(decommission[0], type, validation)
                 end
