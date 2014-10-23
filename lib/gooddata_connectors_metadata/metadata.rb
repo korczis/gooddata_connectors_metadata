@@ -89,7 +89,7 @@ module GoodData
           response = db_collection.find('_id' => db_key).limit(1)
           value = response.first
           if value
-            if !value.include?('history')
+            unless value.include?('history')
               db_collection.update({ '_id' => db_key }, { 'history' => [] })
             end
           end
@@ -130,7 +130,7 @@ module GoodData
           mandatory_parameters.each_pair do |key, value|
             if @hash['configuration'].key?(key)
               value.each do |field|
-                if !@hash['configuration'][key].key?(field)
+                unless @hash['configuration'][key].key?(field)
                   missing_fields[key] = [] if missing_fields[key].nil?
                   missing_fields[key] << field
                 end
@@ -213,7 +213,7 @@ module GoodData
         # THis entities are added to entities list in metadata storage
         def add_default_entities(default_entities)
           # Adding default entities only in case that user has not specified the entities by himself
-          if !@hash['configuration'].include?('entities')
+          unless @hash['configuration'].include?('entities')
 
             default_entities.each_pair do |entity_name, entity_hash|
               if entity_hash.include?('fields') && !entity_hash['fields'].empty?
@@ -318,7 +318,7 @@ module GoodData
                 source[k] = v
               end
             else
-              if !source.key?(k)
+              unless source.key?(k)
                 source[k] = v
               end
             end

@@ -142,10 +142,10 @@ module GoodData
         end
 
         def add_validation(key, type, validation)
-          if !@validations.include?(key)
+          unless @validations.include?(key)
             @validations[key] = {}
           end
-          if !@validations[key].include?(type)
+          unless @validations[key].include?(type)
             @validations[key][type] = nil
           end
           @validations[key][type] = validation
@@ -166,7 +166,7 @@ module GoodData
           fields_to_add = entity.fields.values - @fields.values
           fields_to_merge = @fields.values & entity.fields.values
 
-          if !entity.fields.values.empty?
+          unless entity.fields.values.empty?
             fields_to_disable.each do |field|
               field.disable('from merge')
             end
@@ -218,8 +218,8 @@ module GoodData
             hash['name'] = { 'source' => field.name, 'target' => target_field.name } if field.name.downcase != target_field.name.downcase
             hash['type'] = { 'source' => field.type, 'target' => target_field.type } if field.type != target_field.type
             hash['disabled'] = { 'source' => field.disabled?, 'target' => target_field.disabled? } if field.disabled? != target_field.disabled?
-            hash['field'] = field if !hash.empty?
-            changes['fields']['changed'] << hash if !hash.empty?
+            hash['field'] = field unless hash.empty?
+            changes['fields']['changed'] << hash unless hash.empty?
           end
           changes
         end

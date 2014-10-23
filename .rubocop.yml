@@ -87,7 +87,7 @@ MethodDefParentheses:
   Enabled: true
 
 NegatedIf:
-  Enabled: false
+  Enabled: true
 
 NonNilCheck:
   Enabled: true
