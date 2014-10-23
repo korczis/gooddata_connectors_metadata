@@ -30,17 +30,13 @@ module GoodData
           end
 
           def set_entity_key_value(id, key, value)
-            unless @entity.include?(id)
-              @entity[id] = {}
-            end
+            @entity[id] = {} unless @entity.include?(id)
             @entity[id][key] = value
           end
 
           def get_entity_value_by_key(id, key)
             if @entity.include?(id)
-              if @entity[id].include?(key)
-                @entity[id][key] = value
-              end
+              @entity[id][key] = value if @entity[id].include?(key)
             end
           end
 
@@ -72,9 +68,7 @@ module GoodData
           end
 
           def set_entity_last_load(id, last_load_data)
-            unless @entity.include?(id)
-              @entity[id] = {}
-            end
+            @entity[id] = {} unless @entity.include?(id)
             @entity[id]['last_load_date'] = last_load_data.to_s
           end
 

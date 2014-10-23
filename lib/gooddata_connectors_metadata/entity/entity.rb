@@ -138,16 +138,12 @@ module GoodData
         end
 
         def get_enabled_fields
-          @fields.values.find_all { |v| !v.disabled? }.map { |v| v.id }
+          @fields.values.select { |v| !v.disabled? }.map { |v| v.id }
         end
 
         def add_validation(key, type, validation)
-          unless @validations.include?(key)
-            @validations[key] = {}
-          end
-          unless @validations[key].include?(type)
-            @validations[key][type] = nil
-          end
+          @validations[key] = {} unless @validations.include?(key)
+          @validations[key][type] = nil unless @validations[key].include?(type)
           @validations[key][type] = validation
         end
 

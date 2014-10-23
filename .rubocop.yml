@@ -2,31 +2,33 @@ ClassLength:
   Enabled: false
 
 CollectionMethods:
-  Enabled: false
+  Enabled: true
 
 CyclomaticComplexity:
   Enabled: false
 
 DefWithParentheses:
-  Enabled: false
+  Enabled: true
 
 Documentation:
   Enabled: false
 
 Eval:
-  Enabled: false
+  Enabled: true
 
 FormatString:
-  Enabled: false
+  Enabled: true
 
 HashSyntax:
-  Enabled: false
+  Enabled: true
 
 LineLength:
+  Enabled: true
   Max: 323
 
 MethodLength:
-  Enabled: false
+  Enabled: true
+  Max: 50
 
 # TEMP ENABLED
 AccessorMethodName:
@@ -42,7 +44,7 @@ BracesAroundHashParameters:
   Enabled: true
 
 CaseIndentation:
-  Enabled: false
+  Enabled: true
 
 DeprecatedHashMethods:
   Enabled: true
@@ -66,7 +68,7 @@ GlobalVars:
   Enabled: false
 
 IfUnlessModifier:
-  Enabled: false
+  Enabled: true
 
 IndentationConsistency:
   Enabled: true

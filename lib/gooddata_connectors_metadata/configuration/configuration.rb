@@ -31,7 +31,7 @@ module GoodData
             hash
           end
 
-          def load_from_password_manager()
+          def load_from_password_manager
           end
         end
       end

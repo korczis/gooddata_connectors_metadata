@@ -61,11 +61,11 @@ module GoodData
 
         def get_entity_list_with_dependencies
           dependency_tree = {}
-          root_elements = @entities.values.find_all { |v| v.dependent_on.nil? }
+          root_elements = @entities.values.select { |v| v.dependent_on.nil? }
           root_elements.each do |v|
             dependency_tree[v.id] = []
           end
-          depenedent_elements = @entities.values.find_all { |v| v.dependent_on }
+          depenedent_elements = @entities.values.select { |v| v.dependent_on }
           depenedent_elements.each do |v|
             if dependency_tree.include?(v.dependent_on)
               dependency_tree[v.dependent_on] << v.id

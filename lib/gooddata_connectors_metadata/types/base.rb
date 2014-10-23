@@ -55,9 +55,7 @@ module GoodData
           else
             fail TypeException, 'The hash need to have type value'
           end
-          if hash.include?('size')
-            @size = hash['size']
-          end
+          @size = hash['size'] if hash.include?('size')
         end
 
         def self.create(input)

@@ -148,9 +148,7 @@ module GoodData
         end
 
         def get_configuration_by_type(type)
-          if @hash['configuration'].key?(type)
-            @hash['configuration'][type]
-          end
+          @hash['configuration'][type] if @hash['configuration'].key?(type)
         end
 
         def get_configuration_by_type_and_key(type, key)
@@ -173,7 +171,7 @@ module GoodData
 
         # Add entities from configuration file to global_entities storage (merging)
         # Configuration is top most priority when merging
-        def add_entities()
+        def add_entities
           if @hash['configuration'].include?('entities')
             @hash['configuration']['entities'].each_pair do |entity_name, entity_hash|
               if entity_hash.include?('fields') && !entity_hash['fields'].empty?
@@ -284,7 +282,7 @@ module GoodData
 
           begin
             # TODO: This looks strange, should it be :host = host, :user_ssl = use_ssl
-            @client = MongoClient.new(host, :ssl => use_ssl)
+            @client = MongoClient.new(host, ssl: use_ssl)
             @db = @client[db_name]
             _auth = @db.authenticate(username, password)
           rescue => e
@@ -318,9 +316,7 @@ module GoodData
                 source[k] = v
               end
             else
-              unless source.key?(k)
-                source[k] = v
-              end
+              source[k] = v unless source.key?(k)
             end
           end
         end
