@@ -54,13 +54,13 @@ EmptyLinesAroundBody:
   Enabled: true
 
 EndAlignment:
-  Enabled: false
+  Enabled: true
 
 Encoding:
-  Enabled: false
+  Enabled: true
 
 FinalNewline:
-  Enabled: false
+  Enabled: true
 
 GlobalVars:
   Enabled: false
@@ -69,70 +69,70 @@ IfUnlessModifier:
   Enabled: false
 
 IndentationConsistency:
-  Enabled: false
+  Enabled: true
 
 IndentationWidth:
-  Enabled: false
+  Enabled: true
 
 IndentHash:
-  Enabled: false
+  Enabled: true
 
 LeadingCommentSpace:
   Enabled: true
 
 MethodCallParentheses:
-  Enabled: false
+  Enabled: true
 
 MethodDefParentheses:
-  Enabled: false
+  Enabled: true
 
 NegatedIf:
   Enabled: false
 
 NonNilCheck:
-  Enabled: false
+  Enabled: true
 
 OpMethod:
-  Enabled: false
+  Enabled: true
 
 ParenthesesAroundCondition:
-  Enabled: false
+  Enabled: true
 
 ParenthesesAsGroupedExpression:
-  Enabled: false
+  Enabled: true
 
 RaiseArgs:
-  Enabled: false
+  Enabled: true
 
 SpaceAfterComma:
-  Enabled: false
+  Enabled: true
 
 SpaceAfterControlKeyword:
-  Enabled: false
+  Enabled: true
 
 SpaceBeforeBlockBraces:
-  Enabled: false
+  Enabled: true
 
 SpaceInsideBlockBraces:
-  Enabled: false
+  Enabled: true
 
 SpaceInsideHashLiteralBraces:
-  Enabled: false
+  Enabled: true
 
 SpaceInsideParens:
-  Enabled: false
+  Enabled: true
 
 SignalException:
-  Enabled: false
+  Enabled: true
 
 StringLiterals:
-  Enabled: false
+  Enabled: true
 
 StringConversionInInterpolation:
-  Enabled: false
+  Enabled: true
 
 TrivialAccessors:
-  Enabled: false
+  Enabled: true
 
 UselessAssignment:
-  Enabled: false
+  Enabled: true

@@ -12,10 +12,10 @@ module GoodData
           connect(options)
           @global_hash = {}
           @hash = {}
-          @entities = Entities.new()
+          @entities = Entities.new
           # Lets load configuration files
           @hash['configuration'] = Configuration.load_from_schedule(options)
-          if !options['configuration_folder'].nil?
+          if options['configuration_folder']
             @hash['configuration'].merge!(Configuration.load_from_files(options['configuration_folder']))
           end
           @hash['configuration']['global'] = options
@@ -34,7 +34,7 @@ module GoodData
               'entities' => @entities.to_hash,
               'runtime' => Runtime.to_hash
             }
-            hash_for_storage = {'_id' => db_key, 'created_at' => Time.now.utc, 'updated_at' => Time.now.utc, 'metadata' => metadata_hash}
+            hash_for_storage = { '_id' => db_key, 'created_at' => Time.now.utc, 'updated_at' => Time.now.utc, 'metadata' => metadata_hash }
             db_collection.insert(hash_for_storage)
           else
             hash_for_storage = record.first
@@ -43,7 +43,7 @@ module GoodData
               'entities' => @entities.to_hash,
               'runtime' => Runtime.to_hash
             }
-            db_collection.update({'_id' => db_key}, hash_for_storage)
+            db_collection.update({ '_id' => db_key }, hash_for_storage)
           end
         end
 
@@ -61,7 +61,7 @@ module GoodData
         #     hash_for_storage = record.first
         #     hash_for_storage["updated_at"] = Time.now.utc
         #     hash_for_storage["metadata"] = @hash
-        #     db_collection.update({"_id" => db_key}, hash_for_storage)
+        #     db_collection.update({ "_id" => db_key }, hash_for_storage)
         #   end
         # end
 
@@ -88,16 +88,16 @@ module GoodData
 
           response = db_collection.find('_id' => db_key).limit(1)
           value = response.first
-          if !value.nil?
+          if value
             if !value.include?('history')
-              db_collection.update({'_id' => db_key}, {'history' => []})
+              db_collection.update({ '_id' => db_key }, { 'history' => [] })
             end
           end
           response = db_collection.find('_id' => db_key).limit(1)
           hash_for_storage = response.first
-          if !hash_for_storage.nil? && hash_for_storage.include?('metadata') && hash_for_storage['metadata'].include?('entities')
-            db_collection.update({'_id' => db_key},
-                                 {'$push' => {
+          if hash_for_storage && hash_for_storage.include?('metadata') && hash_for_storage['metadata'].include?('entities')
+            db_collection.update({ '_id' => db_key },
+                                 { '$push' => {
                                    'history' => {
                                      'load_id' => Runtime.get_load_id,
                                      'date' => Time.now.utc,
@@ -105,7 +105,7 @@ module GoodData
                                        'entities' => hash_for_storage['metadata']['entities']
                                      }
                                    }
-                                 }
+                                  }
                                  }
             )
 
@@ -180,13 +180,13 @@ module GoodData
                 if entity_hash.include?('custom')
                   entity_hash['custom'].merge!('load_fields_from_source_system' => false)
                 else
-                  entity_hash['custom'] = {'load_fields_from_source_system' => false}
+                  entity_hash['custom'] = { 'load_fields_from_source_system' => false }
                 end
               else
                 if entity_hash.include?('custom')
                   entity_hash['custom'].merge!('load_fields_from_source_system' => true)
                 else
-                  entity_hash['custom'] = {'load_fields_from_source_system' => true}
+                  entity_hash['custom'] = { 'load_fields_from_source_system' => true }
                 end
               end
               entity_hash.merge!('id' => entity_name) unless entity_hash.include?('id')
@@ -220,13 +220,13 @@ module GoodData
                 if entity_hash.include?('custom')
                   entity_hash['custom'].merge!('load_fields_from_source_system' => false)
                 else
-                  entity_hash['custom'] = {'load_fields_from_source_system' => false}
+                  entity_hash['custom'] = { 'load_fields_from_source_system' => false }
                 end
               else
                 if entity_hash.include?('custom')
                   entity_hash['custom'].merge!('load_fields_from_source_system' => true)
                 else
-                  entity_hash['custom'] = {'load_fields_from_source_system' => true}
+                  entity_hash['custom'] = { 'load_fields_from_source_system' => true }
                 end
               end
               entity_hash.merge!('id' => entity_name) unless entity_hash.include?('id')
@@ -256,7 +256,7 @@ module GoodData
           @entities << entity
         end
 
-        def list_entities
+        def list_entities # rubocop:disable TrivialAccessors
           @entities
         end
 
@@ -264,7 +264,7 @@ module GoodData
           @entities.get_entity_list_with_dependencies
         end
 
-        def now
+        def now # rubocop:disable TrivialAccessors
           @now
         end
 
@@ -283,11 +283,12 @@ module GoodData
           db_name = options['db_name']
 
           begin
-            @client = MongoClient.new(host = host, user_ssl = use_ssl)
+            # TODO: This looks strange, should it be :host = host, :user_ssl = use_ssl
+            @client = MongoClient.new(host, :ssl => use_ssl)
             @db = @client[db_name]
-            auth = @db.authenticate(username, password)
+            _auth = @db.authenticate(username, password)
           rescue => e
-            fail MetadataException, e.message
+            raise MetadataException, e.message
           end
         end
 

@@ -52,7 +52,7 @@ module GoodData
           end
 
           def get_load_id
-            if !@global.nil?
+            if @global
               @global['load_id'] || 0
             else
               0
@@ -78,7 +78,7 @@ module GoodData
             @entity[id]['last_load_date'] = last_load_data.to_s
           end
 
-          def now
+          def now # rubocop:disable TrivialAccessors
             @now
           end
         end

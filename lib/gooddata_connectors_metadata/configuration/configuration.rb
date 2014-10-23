@@ -15,10 +15,10 @@ module GoodData
                 json = JSON.parse(File.read(file))
                 hash[config_leaf_name] = json
                 $log.info "Config for #{config_leaf_name} successfully loaded"
-              rescue JSON::ParserError => e
-                fail MetadataException, "The parsing of file #{file} has failed. Most likely malformed JSON. Please inspect the configuration file"
+              rescue JSON::ParserError => _e
+                raise MetadataException, "The parsing of file #{file} has failed. Most likely malformed JSON. Please inspect the configuration file"
               rescue => e
-                fail MetadataException, "Unknown error where parsing JSON file. Message: #{e.message}"
+                raise MetadataException, "Unknown error where parsing JSON file. Message: #{e.message}"
               end
             end
             hash

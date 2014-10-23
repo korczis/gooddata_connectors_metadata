@@ -14,8 +14,8 @@ module GoodData
           end
         end
 
-        def ==(obj)
-          to_simple_string == obj.to_simple_string
+        def ==(other)
+          to_simple_string == other.to_simple_string
         end
 
         def to_simple_string
@@ -60,7 +60,7 @@ module GoodData
           end
         end
 
-        def self.create input
+        def self.create(input)
           type = nil
           if input.instance_of? String
             type = input.split('-')[0]
@@ -68,18 +68,18 @@ module GoodData
             type = input['type']
           end
           case type
-            when 'date'
-              DateType.new(input)
-            when 'boolean'
-              BooleanType.new(input)
-            when 'decimal'
-              DecimalType.new(input)
-            when 'integer'
-              IntegerType.new(input)
-            when 'string'
-              StringType.new(input)
-            else
-              fail ArgumentError, "Bad log file type: #{input.to_s}"
+          when 'date'
+            DateType.new(input)
+          when 'boolean'
+            BooleanType.new(input)
+          when 'decimal'
+            DecimalType.new(input)
+          when 'integer'
+            IntegerType.new(input)
+          when 'string'
+            StringType.new(input)
+          else
+            fail ArgumentError, "Bad log file type: #{input}"
           end
         end
 

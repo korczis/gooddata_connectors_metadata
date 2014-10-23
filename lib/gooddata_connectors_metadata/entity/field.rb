@@ -13,26 +13,26 @@ module GoodData
         # hash
         def initialize(args = {})
           @enabled = true
-          if !args['hash'].nil?
+          if args['hash']
             from_hash(args['hash'])
-          elsif !args['id'].nil?
+          elsif args['id']
             @id = args['id']
             @name = args['name'] || args['id']
-            if !args['type'].nil?
+            if args['type']
               @type = BaseType.create(args['type'])
             else
               @type = BaseType.create('string-255')
             end
             @custom = args['custom'] || {}
-            @history = args['history'] unless (args['history'].nil?)
+            @history = args['history'] if args['history']
             @enabled = args['enabled'] || true
           else
             fail EntityException, 'Missing mandatory parameters when creating fields, mandatory fields are id,name,type or hash'
           end
         end
 
-        def <=>(obj)
-          @id.downcase <=> obj.id.downcase
+        def <=>(other)
+          @id.downcase <=> other.id.downcase
         end
 
         def hash

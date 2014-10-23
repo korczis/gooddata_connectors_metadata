@@ -36,7 +36,7 @@ module GoodData
           @with_time = hash['with_time'] || false
         end
 
-        def with_time?
+        def with_time? # rubocop:disable TrivialAccessors
           @with_time
         end
       end

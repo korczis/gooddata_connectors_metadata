@@ -22,13 +22,13 @@ module GoodData
         def initialize(args = {})
           @fields = {}
           @validations = {}
-          if !args['hash'].nil?
+          if args['hash']
             from_hash(args['hash'])
-          elsif !args['id'].nil?
+          elsif args['id']
             @id = args['id']
             @name = args['name'] || args['id']
             @history = args['history'] || {}
-            @custom = args['custom'] unless (args['custom'].nil?)
+            @custom = args['custom'] if args['custom']
             @enabled = args['enabled'] || true
             @type = args['type'] || 'input|output'
             @runtime = args['runtime'] || {}
@@ -43,8 +43,8 @@ module GoodData
           end
         end
 
-        def ==(entity)
-          @id == entity.id
+        def ==(other)
+          @id == other.id
         end
 
         def to_hash
@@ -152,7 +152,7 @@ module GoodData
         end
 
         def get_validation_by_type(key, type)
-          if !@validations[key].nil? && @validations[key].include?(type)
+          if @validations[key] && @validations[key].include?(type)
             @validations[key][type]
           end
         end
@@ -192,10 +192,10 @@ module GoodData
         # IT will return the changes in hash
         def diff(entity)
           changes = {}
-          changes['name'] = {'source' => @name, 'target' => entity.name} if @name.downcase != entity.name.downcase
-          changes['disabled'] = {'source' => disabled?, 'target' => entity.disabled?} if disabled? != entity.disabled?
-          changes['type'] = {'source' => @type, 'target' => entity.type} if (@type.split('|') & entity.type.split('|')).count != @type.split('|').count
-          changes['dependent_on'] = {'source' => @dependent_on, 'target' => entity.dependent_on} if @dependent_on != entity.dependent_on
+          changes['name'] = { 'source' => @name, 'target' => entity.name } if @name.downcase != entity.name.downcase
+          changes['disabled'] = { 'source' => disabled?, 'target' => entity.disabled? } if disabled? != entity.disabled?
+          changes['type'] = { 'source' => @type, 'target' => entity.type } if (@type.split('|') & entity.type.split('|')).count != @type.split('|').count
+          changes['dependent_on'] = { 'source' => @dependent_on, 'target' => entity.dependent_on } if @dependent_on != entity.dependent_on
           changes['fields'] = {}
           changes['fields']['only_in_source'] = []
           changes['fields']['only_in_target'] = []
@@ -215,9 +215,9 @@ module GoodData
           fields_in_both_collections.each do |field|
             target_field = entity.get_field(field.id)
             hash = {}
-            hash['name'] = {'source' => field.name, 'target' => target_field.name} if field.name.downcase != target_field.name.downcase
-            hash['type'] = {'source' => field.type, 'target' => target_field.type} if field.type != target_field.type
-            hash['disabled'] = {'source' => field.disabled?, 'target' => target_field.disabled?} if field.disabled? != target_field.disabled?
+            hash['name'] = { 'source' => field.name, 'target' => target_field.name } if field.name.downcase != target_field.name.downcase
+            hash['type'] = { 'source' => field.type, 'target' => target_field.type } if field.type != target_field.type
+            hash['disabled'] = { 'source' => field.disabled?, 'target' => target_field.disabled? } if field.disabled? != target_field.disabled?
             hash['field'] = field if !hash.empty?
             changes['fields']['changed'] << hash if !hash.empty?
           end
