@@ -77,7 +77,7 @@ module GoodData
           when 'string'
             StringType.new(input)
           else
-            fail ArgumentError, "Bad log file type: #{input}"
+            fail ArgumentError, "Bad type: #{input}"
           end
         end
 

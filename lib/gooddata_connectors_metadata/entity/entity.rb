@@ -141,6 +141,10 @@ module GoodData
           @fields.values.select { |v| !v.disabled? }.map { |v| v.id }
         end
 
+        def get_enabled_fields_objects
+          @fields.values.select { |v| !v.disabled? }
+        end
+
         def add_validation(key, type, validation)
           @validations[key] = {} unless @validations.include?(key)
           @validations[key][type] = nil unless @validations[key].include?(type)
