@@ -32,14 +32,11 @@ module GoodData
           metadata = Metadata.new(params)
           # This section will handle default metadata load
 
-          fail MetadataException, 'The variable LOAD_ID is not present in metadata initialization call' if params['LOAD_ID'].nil?
+
           fail MetadataException, 'The variable SCHEDULE_ID is not present in metadata initialization call' if params['SCHEDULE_ID'].nil?
 
           # TODO: Eliminate $SCHEDULE_ID global variable
           $SCHEDULE_ID = params['SCHEDULE_ID']
-
-          # TODO: Eliminate $LOAD_ID global variable
-          $LOAD_ID = params['LOAD_ID']
           if $SCHEDULE_ID
             $log.info "Loading global metadata for schedule #{$SCHEDULE_ID}"
             metadata.load_global_hash($SCHEDULE_ID)
