@@ -36,10 +36,9 @@ module GoodData
           fail MetadataException, 'The variable SCHEDULE_ID is not present in metadata initialization call' if params['SCHEDULE_ID'].nil?
 
           # TODO: Eliminate $SCHEDULE_ID global variable
-          $SCHEDULE_ID = params['SCHEDULE_ID']
-          if $SCHEDULE_ID
-            $log.info "Loading global metadata for schedule #{$SCHEDULE_ID}"
-            metadata.load_global_hash($SCHEDULE_ID)
+          if params['SCHEDULE_ID']
+            $log.info "Loading global metadata for schedule #{params['SCHEDULE_ID']}"
+            metadata.load_global_hash(params['SCHEDULE_ID'])
           end
           @app.call(params.merge('metadata_wrapper' => metadata))
         end
