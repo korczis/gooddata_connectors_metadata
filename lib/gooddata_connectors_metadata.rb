@@ -40,7 +40,7 @@ module GoodData
             $log.info "Loading global metadata for schedule #{params['SCHEDULE_ID']}"
             metadata.load_global_hash(params['SCHEDULE_ID'])
           end
-          @app.call(params.merge('metadata_wrapper' => metadata))
+          @app.call(params.merge!("metadata_wrapper" => metadata))
         end
       end
     end
