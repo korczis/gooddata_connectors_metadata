@@ -27,7 +27,16 @@ module GoodData
           # TO-DO this need to be changed, because it don't make sense
           def load_from_schedule(params)
             hash = {}
-            hash['schedule_params'] = params
+            # If the configuraion parameter have format (leaf_name)|key_name, we will put it to specific part of configuration
+            params.each_pair do |key,value|
+              if (key.split("|").count == 2)
+                parsed_keys = key.split("|")
+                hash[parsed_keys[0]] = {} if !hash.include?(parsed_keys[0])
+                hash[parsed_keys[0]].merge!({parsed_keys[1] => value})
+              else
+                hash[key] = value
+              end
+            end
             hash
           end
 
