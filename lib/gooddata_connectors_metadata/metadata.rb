@@ -19,6 +19,7 @@ module GoodData
             @hash['configuration'].merge!(Configuration.load_from_files(options['configuration_folder']))
           end
           @hash['configuration']['global'] = options
+          pp @hash['configuration']
         end
 
         # This method should be called from client, anytime the metadata (global) are changed
