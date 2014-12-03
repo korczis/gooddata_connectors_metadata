@@ -14,10 +14,11 @@ module GoodData
           @hash = {}
           @entities = Entities.new
           # Lets load configuration files
-          @hash['configuration'] = Configuration.load_from_schedule(options)
+          @hash['configuration'] = {}
           if options['configuration_folder']
             @hash['configuration'].merge!(Configuration.load_from_files(options['configuration_folder']))
           end
+          @hash['configuration'].merge!(Configuration.load_from_schedule(options))
           @hash['configuration']['global'] = options
           pp @hash['configuration']
         end
