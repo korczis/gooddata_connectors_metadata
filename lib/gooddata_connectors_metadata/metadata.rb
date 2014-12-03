@@ -5,6 +5,14 @@ require 'mongo'
 module GoodData
   module Connectors
     module Metadata
+
+      class ::Hash
+        def deep_merge(second)
+          merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : [:undefined, nil, :nil].include?(v2) ? v1 : v2 }
+          self.merge(second, &merger)
+        end
+      end
+
       class Metadata
         include ::Mongo
 
@@ -18,7 +26,7 @@ module GoodData
           if options['configuration_folder']
             @hash['configuration'].merge!(Configuration.load_from_files(options['configuration_folder']))
           end
-          @hash['configuration'].merge!(Configuration.load_from_schedule(options))
+          @hash['configuration'] = @hash['configuration'].deep_merge(Configuration.load_from_schedule(options))
           @hash['configuration']['global'] = options
           pp @hash['configuration']
         end
