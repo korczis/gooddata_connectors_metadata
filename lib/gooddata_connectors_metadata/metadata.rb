@@ -28,7 +28,6 @@ module GoodData
           end
           @hash['configuration'] = @hash['configuration'].deep_merge(Configuration.load_from_schedule(options))
           @hash['configuration']['global'] = options
-          pp @hash['configuration']
         end
 
         # This method should be called from client, anytime the metadata (global) are changed
