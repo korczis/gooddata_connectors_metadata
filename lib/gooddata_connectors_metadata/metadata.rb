@@ -103,8 +103,8 @@ module GoodData
             end
           end
 
-          $log.info "Saving history under key #{db_key + "-" + Runtime.get_load_id}"
-          hash_for_storage = { '_id' => db_key + "-" + Runtime.get_load_id , 'created_at' => Time.now.utc, 'updated_at' => Time.now.utc, 'metadata' => @global_hash }
+          $log.info "Saving history under key #{db_key.to_s + "-" + Runtime.get_load_id.to_s}"
+          hash_for_storage = { '_id' => db_key.to_s + "-" + Runtime.get_load_id.to_s , 'created_at' => Time.now.utc, 'updated_at' => Time.now.utc, 'metadata' => @global_hash }
           db_collection.insert(hash_for_storage)
 
           fail "test"
