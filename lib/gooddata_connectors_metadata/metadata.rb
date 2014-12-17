@@ -102,23 +102,31 @@ module GoodData
               db_collection.update({ '_id' => db_key }, { 'history' => [] })
             end
           end
-          response = db_collection.find('_id' => db_key).limit(1)
-          hash_for_storage = response.first
-          if hash_for_storage && hash_for_storage.include?('metadata') && hash_for_storage['metadata'].include?('entities')
-            db_collection.update({ '_id' => db_key },
-                                 { '$push' => {
-                                   'history' => {
-                                     'load_id' => Runtime.get_load_id,
-                                     'date' => Time.now.utc,
-                                     'metadata' => {
-                                       'entities' => hash_for_storage['metadata']['entities']
-                                     }
-                                   }
-                                  }
-                                 }
-            )
 
-          end
+          $log.info "Saving history under key #{db_key + "-" + Runtime.get_load_id}"
+          hash_for_storage = { '_id' => db_key + "-" + Runtime.get_load_id , 'created_at' => Time.now.utc, 'updated_at' => Time.now.utc, 'metadata' => @global_hash }
+          db_collection.insert(hash_for_storage)
+
+          fail "test"
+
+          # The history stored this way was breaking mongo document  (16MB size )
+          # response = db_collection.find('_id' => db_key).limit(1)
+          # hash_for_storage = response.first
+          # if hash_for_storage && hash_for_storage.include?('metadata') && hash_for_storage['metadata'].include?('entities')
+          #   db_collection.update({ '_id' => db_key },
+          #                        { '$push' => {
+          #                          'history' => {
+          #                            'load_id' => Runtime.get_load_id,
+          #                            'date' => Time.now.utc,
+          #                            'metadata' => {
+          #                              'entities' => hash_for_storage['metadata']['entities']
+          #                            }
+          #                          }
+          #                         }
+          #                        }
+          #   )
+          #
+          # end
           Runtime.set_load_id(Runtime.get_load_id + 1)
         end
 
