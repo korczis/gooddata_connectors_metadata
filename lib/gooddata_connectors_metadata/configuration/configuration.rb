@@ -33,7 +33,7 @@ module GoodData
                 parsed_keys = key.split("|")
                 hash[parsed_keys[0]] = {} if !hash.include?(parsed_keys[0])
                 hash[parsed_keys[0]].merge!({parsed_keys[1] => value})
-                puts "Adding #{parsed_keys[0]} #{parsed_keys[1]} #{value}"
+                puts "Adding #{parsed_keys[0]} #{parsed_keys[1]}"
               else
                 hash[key] = value
               end
