@@ -1,7 +1,5 @@
 # encoding: UTF-8
 
-require 'mongo'
-
 module GoodData
   module Connectors
     module Metadata
@@ -13,114 +11,277 @@ module GoodData
         end
       end
 
+
+
       class Metadata
-        include ::Mongo
+
+        CONFIGURATION_PATH = "metadata/entities.json"
+        SOURCE_METADATA_PATH = "metadata/source.json"
+
+        attr_accessor :bds_client,:entities,:global_configuration
 
         def initialize(options = {})
-          connect(options)
-          @global_hash = {}
           @hash = {}
+          load_configuration(options)
+          @bds_client = connect(options)
           @entities = Entities.new
+          @global_configuration = @bds_client.load_configuration
+          # Initialize time of load
+          Runtime.fill
           # Lets load configuration files
-          @hash['configuration'] = {}
-          if options['configuration_folder']
-            @hash['configuration'].merge!(Configuration.load_from_files(options['configuration_folder']))
+        end
+
+
+        def set_source_context(source,options = {},source_object = nil)
+          @bds_client.context.data_source = source
+          if (@global_configuration.include?("downloaders"))
+            downloader_settings = @global_configuration["downloaders"].find{|settings| settings["id"] == source}
+            if (!downloader_settings.nil?)
+              if (downloader_settings.include?("entities"))
+                downloader_settings["entities"].each do |entity_name|
+                  if (!@global_configuration["entities"].include?(entity_name))
+                    raise MetadataException,"The downloader settings is containing entity, which is not in global entity list #{entity_name}"
+                  end
+                  # Load of the last timestamp
+                  @bds_client.context.entity = entity_name
+                  start_date = @bds_client.last_business_date(entity_name)
+                  main_entity = load_entity_configuration(entity_name,source_object)
+                  main_entity.store_runtime_param("start_date",start_date)
+                  if (downloader_settings.include?("customers"))
+                    downloader_settings["customers"].each do |customer|
+                      start_date = @bds_client.last_business_date(entity_name,customer)
+                      load_custom_entity_configuration(entity_name,customer,source_object)
+                      main_entity.store_runtime_param("start_date",start_date,customer)
+                    end
+                  end
+                  # Let check if there are any connected entities
+                  if (@global_configuration["entities"][entity_name]["global"].include?("connected_to"))
+                    @global_configuration["entities"][entity_name]["global"]["connected_to"].each do |connected_entity|
+                      entity = load_entity_configuration(connected_entity,source_object,entity_name)
+                      entity.store_runtime_param("start_date",main_entity.get_runtime_param("start_date"))
+                      if (downloader_settings.include?("customers"))
+                        downloader_settings["customers"].each do |customer|
+                          load_custom_entity_configuration(connected_entity,customer,source_object)
+                          entity.store_runtime_param("start_date",main_entity.get_runtime_param("start_date",customer),customer)
+                        end
+                      end
+                    end
+                  end
+                end
+              else
+                raise MetadataException,"There are no entities settings in config file. ( Missing entities element in element.json)"
+              end
+            else
+              raise MetadataException,"There is not downloader with id: #{source}"
+            end
           end
-          @hash['configuration'] = @hash['configuration'].deep_merge(Configuration.load_from_schedule(options))
+        end
+
+        def load_entity_configuration(entity_name,source_object,parent_entity = nil)
+          entity_settings = @global_configuration["entities"][entity_name]["global"]
+          response = @bds_client.get_entity_metadata(entity_name)
+          metadata = response[:metadata]
+          entity_settings["custom"] = {} if !entity_settings.include?("custom")
+          # If there is no field setting in metadata, lets load the fields in downloder
+          entity = nil
+          if (!entity_settings.include?("fields") or entity_settings["fields"].count == 0 )
+            entity_settings["custom"]["automatic"] = true
+          else
+            entity_settings["custom"]["automatic"] = false
+          end
+          if (!metadata.nil?)
+            $log.info "Metadata file found on storage for entity #{entity_name}."
+            entity_settings.merge!({"dependent_on" => parent_entity}) unless parent_entity.nil?
+            entity_from_metadata = Entity.new("hash" => metadata)
+            entity_from_setting = Entity.new("hash" => entity_settings)
+            entity_from_metadata.merge!(entity_from_setting)
+            entity = entity_from_metadata
+            entity.store_runtime_param("metadata_date",response[:time_element])
+            entity.store_runtime_param("metadata_file","#{response[:time_element][:timestamp]}_metadata.json")
+          else
+            # The metadata could not be found on S3, we are creating new default metadata
+            $log.info "Metadata file not found on storage for entity #{entity_name}. Creating new metadata."
+            if (!source_object.nil?)
+              default_settings = {}
+              if (source_object.define_default_entities.include?(entity_name))
+                default_settings = source_object.define_default_entities[entity_name]
+              end
+              merged_settings = entity_settings.merge(default_settings){|key,oldval,newval| oldval}
+              merged_settings.merge!({"id" => entity_name,"name" => entity_name})
+              merged_settings.merge!({"dependent_on" => parent_entity}) unless parent_entity.nil?
+              entity = Entity.new("hash" => merged_settings)
+            end
+          end
+          @entities << entity
+          entity
+        end
+
+        def load_custom_entity_configuration(entity_name, customer,source_object)
+          customer_settings = {}
+          if (@global_configuration["entities"][entity_name].include?(customer))
+            customer_settings = @global_configuration["entities"][entity_name][customer]
+          end
+          # Currently we are using only fields configuration from customer settings
+          raise MetadataException, "You are trying add custom entity, which don't heva global settings. Entity Name: #{entity_name}" if !@entities.include?(entity_name)
+          entity = @entities[entity_name]
+          response = @bds_client.get_entity_metadata(entity_name,customer)
+          metadata = response[:metadata]
+          if (!metadata.nil?)
+            $log.info "Metadata for customer #{customer} found on storage."
+            metadata["fields"].each do |field|
+              entity.add_field(field,customer)
+            end
+            if (customer_settings.include?("fields"))
+              customer_settings["fields"].each do |settings_field|
+                if (!entity.field_exist?(settings_field,customer))
+                  entity.add_field({"id" => settings_field,"type" => "string-255"},customer)
+                end
+              end
+            end
+            entity.get_enabled_customer_fields_objects(customer).each do |field|
+                if (!customer_settings.include?("fields") or !customer_settings["fields"].include?(field.id))
+                  field.disable("Removed from customer settings")
+                end
+            end
+            entity.store_runtime_param("metadata_date",response[:time_element],customer)
+            entity.store_runtime_param("metadata_file","#{response[:time_element][:timestamp]}_metadata.json")
+          else
+            # The metadata could not be found on S3, we are creating new default metadata
+            if (!source_object.nil?)
+              customer_settings = {}
+              if (@global_configuration["entities"][entity_name].include?(customer))
+                customer_settings = @global_configuration["entities"][entity_name][customer]
+              end
+              if (customer_settings.include?("fields"))
+                $log.info "Metadata for #{customer} not found on storage. Creating."
+                customer_settings["fields"].each do |settings_field|
+                  entity.add_field({"id" => settings_field,"type" => "string-255"},customer)
+                end
+              end
+            end
+          end
+          entity
+        end
+
+
+        def load_configuration(options)
+          @hash['configuration'] = {}
           @hash['configuration']['global'] = options
+          @hash['configuration'] = @hash['configuration'].deep_merge(Configuration.load_from_schedule(options))
+        end
+
+        def save
+          @entities.each do |entity|
+           save_entity(entity)
+          end
+        end
+
+        def save_entity(entity)
+          downloader_settings = @global_configuration["downloaders"].find{|settings| settings["id"] == @bds_client.context.data_source}
+          File.open("metadata/#{Runtime.now_timestamp}_#{entity.id}_metadata.json","w") do |f|
+            f.write(JSON.pretty_generate(entity.to_hash))
+          end
+          full_path = @bds_client.context.construct_full_metadata_path(entity.id,"#{Runtime.now_timestamp}_metadata.json",Runtime.now)
+          result = @bds_client.store(full_path,{:file => "metadata/#{Runtime.now_timestamp}_#{entity.id}_metadata.json"})
+          raise MetadataException, "The file #{full_path} was not saved on S3" if result[:status] == :failed
+          entity.store_runtime_param("metadata_file","#{Runtime.now_timestamp}_metadata.json")
+          entity.store_runtime_param("metadata_date",{:year => TimeHelper.year(Runtime.now) ,:month => TimeHelper.month(Runtime.now),:day => TimeHelper.day(Runtime.now),:timestamp => Runtime.now_timestamp })
+          if (!downloader_settings.nil? and downloader_settings.include?("customers"))
+            downloader_settings["customers"].each do |customer|
+              if (entity.customer_have_fields?(customer))
+                save_customer_metadata(entity,customer)
+              end
+            end
+          end
+        end
+
+
+        def save_customer_metadata(entity,customer)
+          local_file_path = "metadata/#{customer}/#{Runtime.now_timestamp}_#{entity.id}_metadata.json"
+          FileUtils.mkdir_p(File.dirname(local_file_path))
+          File.open(local_file_path,"w") do |f|
+            f.write(JSON.pretty_generate(entity.to_hash(customer)))
+          end
+          full_path = @bds_client.context.construct_full_metadata_path(entity.id,"#{customer}/#{Runtime.now_timestamp}_metadata.json",Runtime.now)
+          result = @bds_client.store(full_path,{:file => local_file_path})
+          raise MetadataException, "We file #{full_path} was not saved on S3. Result: #{result[:reason]}" if result[:status] == :failed
+          entity.store_runtime_param("metadata_file","#{Runtime.now_timestamp}_metadata.json",customer)
+          entity.store_runtime_param("metadata_date",
+                                      {:year => TimeHelper.year(Runtime.now),
+                                       :month => TimeHelper.month(Runtime.now),
+                                       :day => TimeHelper.day(Runtime.now),
+                                       :timestamp => Runtime.now_timestamp
+                                      },customer)
+        end
+
+        def save_data(entity,customer = nil)
+          file = entity.get_runtime_param("source_filename",customer)
+          remote_path = ""
+          if (customer.nil?)
+            remote_path = "#{Metadata::Runtime.now_timestamp}_data.csv"
+          else
+            remote_path = "#{customer}/#{Runtime.now_timestamp}_data.csv"
+          end
+          @bds_client.store_data(entity.id,file,remote_path,Runtime.now,entity.runtime)
         end
 
         # This method should be called from client, anytime the metadata (global) are changed
-        def store_global_hash(options = {})
-          db_collection_param = options['db_collection'] || 'default'
-          fail MetadataException, 'You have not specified the database collection' if db_collection_param.nil? || db_collection_param.empty?
-          db_collection = @db[db_collection_param]
-          fail MetadataExpcetion, 'The schedule_id is null, cannot generate database key' if $SCHEDULE_ID.nil?
-          db_key = $SCHEDULE_ID
-          record = db_collection.find('_id' => db_key).limit(1)
-          if record.count == 0
-            metadata_hash = {
-              'entities' => @entities.to_hash,
-              'runtime' => Runtime.to_hash
-            }
-            hash_for_storage = { '_id' => db_key, 'created_at' => Time.now.utc, 'updated_at' => Time.now.utc, 'metadata' => metadata_hash }
-            db_collection.insert(hash_for_storage)
-          else
-            hash_for_storage = record.first
-            hash_for_storage['updated_at'] = Time.now.utc
-            hash_for_storage['metadata'] = {
-              'entities' => @entities.to_hash,
-              'runtime' => Runtime.to_hash
-            }
-            db_collection.update({ '_id' => db_key }, hash_for_storage)
-          end
-        end
-
-        # # This method should be called from client, anytime the metadata (per execution) are changed
-        # def store_hash(schedule_id, execution_id, options = {})
-        #   db_collection_param = options["db_collection"] || "default"
-        #   fail MetadataException, "You have not specified the database collection" if db_collection_param.nil? || db_collection_param.empty?
+        # def store_global_hash(options = {})
+        #   db_collection_param = options['db_collection'] || 'default'
+        #   fail MetadataException, 'You have not specified the database collection' if db_collection_param.nil? || db_collection_param.empty?
         #   db_collection = @db[db_collection_param]
-        #   db_key = generate_key(schedule_id, execution_id)
-        #   record = db_collection.find({"_id" => db_key}).limit(1)
-        #   if (record.count == 0)
-        #     hash_for_storage = {"_id" => db_key, "created_at" => Time.now.utc, "updated_at" => Time.now.utc, "metadata" => @hash}
+        #   fail MetadataExpcetion, 'The schedule_id is null, cannot generate database key' if $SCHEDULE_ID.nil?
+        #   db_key = $SCHEDULE_ID
+        #   record = db_collection.find('_id' => db_key).limit(1)
+        #   if record.count == 0
+        #     metadata_hash = {
+        #       'entities' => @entities.to_hash,
+        #       'runtime' => Runtime.to_hash
+        #     }
+        #     hash_for_storage = { '_id' => db_key, 'created_at' => Time.now.utc, 'updated_at' => Time.now.utc, 'metadata' => metadata_hash }
         #     db_collection.insert(hash_for_storage)
         #   else
         #     hash_for_storage = record.first
-        #     hash_for_storage["updated_at"] = Time.now.utc
-        #     hash_for_storage["metadata"] = @hash
-        #     db_collection.update({ "_id" => db_key }, hash_for_storage)
+        #     hash_for_storage['updated_at'] = Time.now.utc
+        #     hash_for_storage['metadata'] = {
+        #       'entities' => @entities.to_hash,
+        #       'runtime' => Runtime.to_hash
+        #     }
+        #     db_collection.update({ '_id' => db_key }, hash_for_storage)
         #   end
         # end
 
-        # This method is called at metadata initialization time and it will load metadata (global) from metadata storage
-        def load_global_hash(options = {})
-          db_collection_param = options['db_collection'] || 'default'
-          fail MetadataException, 'You have not specified the database collection' if db_collection_param.nil? || db_collection_param.empty?
-          db_collection = @db[db_collection_param]
-          db_key = $SCHEDULE_ID
-          response = db_collection.find('_id' => db_key).limit(1)
-          fail MetadataException, 'The response from database has returned more than one record. Critical error please contact administrator' if response.count > 1
-          if response.count == 1
-            hash_for_storage = response.first
-            @global_hash = hash_for_storage['metadata'] || {}
-            if !@global_hash.empty?
-              @entities = Entities.new('hash' => @global_hash['entities'])
-              Runtime.fill(@global_hash['runtime'] || {})
-            else
-              Runtime.fill({})
-            end
-          elsif response.count == 0
-            Runtime.fill({})
-          end
+        def get_context_entities_ids
+          downloader_settings = @global_configuration["downloaders"].find{|settings| settings["id"] == @bds_client.context.data_source}
+          if (!downloader_settings.nil? and downloader_settings.include?("entities"))
+            entities_with_dependencies = get_entity_list_with_dependencies
+            downloader_settings["entities"].each do |entity_id|
+              entities_with_dependencies.delete_if do |k,v|
+                !downloader_settings["entities"].include?(k)
+              end
 
-          response = db_collection.find('_id' => db_key).limit(1)
-          value = response.first
-          if value
-            unless value.include?('history')
-              db_collection.update({ '_id' => db_key }, { 'history' => [] })
             end
+            entities_with_dependencies
+          else
+            {}
           end
-          response = db_collection.find('_id' => db_key).limit(1)
-          hash_for_storage = response.first
-          if hash_for_storage && hash_for_storage.include?('metadata') && hash_for_storage['metadata'].include?('entities')
-            db_collection.update({ '_id' => db_key },
-                                 { '$push' => {
-                                   'history' => {
-                                     'load_id' => Runtime.get_load_id,
-                                     'date' => Time.now.utc,
-                                     'metadata' => {
-                                       'entities' => hash_for_storage['metadata']['entities']
-                                     }
-                                   }
-                                  }
-                                 }
-            )
-
-          end
-          Runtime.set_load_id(Runtime.get_load_id + 1)
         end
+
+
+        def get_context_customers
+          downloader_settings = @global_configuration["downloaders"].find{|settings| settings["id"] == @bds_client.context.data_source}
+          if (!downloader_settings.nil? and downloader_settings.include?("customers"))
+            downloader_settings["customers"]
+          else
+            []
+          end
+        end
+
+        def load_fields_from_source?(entity_id)
+          !@global_configuration["entities"][entity_id]["global"].include?("fields") or @global_configuration["entities"][entity_id]["global"]["fields"].empty?
+        end
+
+
 
         # # This method is called at metadata initialization time and it will load metadata (global) from metadata storage
         # def load_hash(schedule_id, execution_id, options={})
@@ -275,6 +436,16 @@ module GoodData
           @now
         end
 
+        def context
+          @bds_client.context
+        end
+
+
+        def timestamp_to_time(timestamp)
+          @bds_client.timestamp_to_time(timestamp)
+        end
+
+
         def print_hash
           pp @hash
         end
@@ -283,20 +454,23 @@ module GoodData
 
         # Connection to MongoDB
         def connect(options = {})
-          host = options['db_host'] || 'localhost'
-          use_ssl = options['use_ssl'] || false
-          username = options['db_username'] || nil
-          password = options['db_password'] || nil
-          db_name = options['db_name']
-
-          begin
-            # TODO: This looks strange, should it be :host = host, :user_ssl = use_ssl
-            @client = MongoClient.new(host, ssl: use_ssl)
-            @db = @client[db_name]
-            _auth = @db.authenticate(username, password)
-          rescue => e
-            raise MetadataException, e.message
-          end
+          bds_access_key = get_configuration_by_type_and_key("global","bds_access_key")
+          bds_secret_key = get_configuration_by_type_and_key("global","bds_secret_key")
+          account_id = get_configuration_by_type_and_key("global","account_id")
+          token = get_configuration_by_type_and_key("global","token")
+          bucket = get_configuration_by_type_and_key("global","bds_bucket")
+          default_folder = get_configuration_by_type_and_key("global","bds_folder")
+          connection = S3Bds.new(
+              {
+                  :key => bds_access_key,
+                  :secret => bds_secret_key,
+                  :account_id => account_id,
+                  :token => token,
+                  :bucket => bucket,
+                  :default_folder => default_folder
+              }
+          )
+          connection
         end
 
         # Generation of key, which is used to store metadata in metadata storage
@@ -307,6 +481,8 @@ module GoodData
 
         # This method is merging the client configuration with default compoment configuration
         def compare_level_of_hash(source, target)
+          pp source
+          pp target
           target.each_pair do |k, v|
             if v.instance_of?(Array)
               if !source.key?(k)

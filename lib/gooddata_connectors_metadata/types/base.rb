@@ -58,29 +58,6 @@ module GoodData
           @size = hash['size'] if hash.include?('size')
         end
 
-        def self.create(input)
-          type = nil
-          if input.instance_of? String
-            type = input.split('-')[0]
-          elsif input.instance_of?(Hash) || input.instance_of?(BSON::OrderedHash)
-            type = input['type']
-          end
-          case type
-          when 'date'
-            DateType.new(input)
-          when 'boolean'
-            BooleanType.new(input)
-          when 'decimal'
-            DecimalType.new(input)
-          when 'integer'
-            IntegerType.new(input)
-          when 'string'
-            StringType.new(input)
-          else
-            fail ArgumentError, "Bad type: #{input}"
-          end
-        end
-
         def default
           nil
         end
@@ -88,6 +65,57 @@ module GoodData
         def nullabble?
           true
         end
+
+
+        @subtypes = nil
+        @subtypes_factory = nil
+
+        class << self
+          def create(input)
+            type = nil
+            if input.instance_of? String
+              type = input.split('-')[0]
+            elsif input.instance_of?(Hash)
+              type = input['type']
+            end
+
+            # Init factory if required
+            create_subtypes_factory unless @subtypes_factory
+            fail ArgumentError, "Bad log file type: #{input}" unless @subtypes_factory.key?(type)
+            klass = @subtypes_factory[type]
+            klass.new(input)
+          end
+
+          def create_subtypes_factory
+            res = {}
+            get_subtypes unless @subtypes
+            @subtypes.each do |subtype|
+              name = subtype.to_s.split('::').last.downcase.gsub(/type$/, '')
+              res[name] = subtype
+            end
+            @subtypes_factory = res
+          end
+
+          def get_subtypes
+            @subtypes = list_subtypes unless @subtypes
+            @subtypes
+          end
+
+          def get_subtypes_factory
+            create_subtypes_factory unless @subtypes_factory
+            @subtypes_factory
+          end
+
+          def get_subtypes_names
+            get_subtypes_factory.keys
+          end
+
+          def list_subtypes
+            ObjectSpace.each_object(Class).select { |klass| klass < self }
+          end
+        end
+
+
       end
     end
   end

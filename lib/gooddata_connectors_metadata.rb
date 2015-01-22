@@ -6,6 +6,7 @@ require 'json'
 require 'gooddata'
 
 require_relative 'gooddata_connectors_metadata/metadata'
+require_relative 'gooddata_connectors_metadata/metadata_context'
 require_relative 'gooddata_connectors_metadata/runtime'
 
 # TODO: List files in directory
@@ -19,6 +20,7 @@ require_relative 'gooddata_connectors_metadata/runtime'
 
 # TODO: List files in directory
 %w(base boolean date decimal integer string).each { |file| require_relative "gooddata_connectors_metadata/types/#{file}" }
+%w(time_helper abstract_bds s3_bds).each { |file| require_relative "gooddata_connectors_metadata/bds/#{file}" }
 require_relative 'gooddata_connectors_metadata/configuration/configuration'
 
 module GoodData
@@ -30,17 +32,7 @@ module GoodData
 
           $log.info 'Initilizing metadata storage'
           metadata = Metadata.new(params)
-          # This section will handle default metadata load
 
-
-          fail MetadataException, 'The variable SCHEDULE_ID is not present in metadata initialization call' if params['SCHEDULE_ID'].nil?
-
-          # TODO: Eliminate $SCHEDULE_ID global variable
-          $SCHEDULE_ID = params['SCHEDULE_ID']
-          if $SCHEDULE_ID
-            $log.info "Loading global metadata for schedule #{$SCHEDULE_ID}"
-            metadata.load_global_hash($SCHEDULE_ID)
-          end
           @app.call(params.merge!("metadata_wrapper" => metadata))
         end
       end

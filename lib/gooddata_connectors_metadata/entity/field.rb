@@ -6,12 +6,12 @@ module GoodData
       class Field
         include Comparable
 
-        attr_accessor :id, :name, :type, :custom, :enabled, :history
+        attr_accessor :id, :name, :type, :custom, :enabled,:order
 
         # Requesting id,name, type and custom
         # or
         # hash
-        def initialize(args = {})
+        def initialize(args)
           @enabled = true
           if args['hash']
             from_hash(args['hash'])
@@ -24,8 +24,8 @@ module GoodData
               @type = BaseType.create('string-255')
             end
             @custom = args['custom'] || {}
-            @history = args['history'] if args['history']
-            @enabled = args['enabled'] || true
+            @enabled = args['enabled'].nil? ? true : args['enabled']
+            @order = args["order"] || ""
           else
             fail EntityException, 'Missing mandatory parameters when creating fields, mandatory fields are id,name,type or hash'
           end
@@ -41,24 +41,25 @@ module GoodData
 
         alias eql? ==
 
+
         def to_hash
           {
             'id' => @id,
             'name' => @name,
+            'order' => @order,
             'type' => @type.to_simple_string,
             'custom' => @custom,
-            'history' => @history,
             'enabled' => @enabled
           }
         end
 
         def from_hash(hash)
           @id = hash['id']
-          @name = hash['name']
+          @name = hash['name'] || hash["id"]
+          @order = hash['order']
           @type = BaseType.create(hash['type'])
           @custom = hash['custom'] || {}
-          @history = hash['history'] unless hash['history'].nil?
-          @enabled = hash['enabled'] || true
+          @enabled = hash['enabled'].nil? ? true : hash['enabled']
         end
 
         def disable(reason = '')
@@ -70,11 +71,15 @@ module GoodData
           !@enabled
         end
 
-        def merge!(field, reenable = false)
-          @name = field.name unless field.name.nil?
-          @type = field.type unless field.type.nil?
-          @enabled = field.enabled if reenable
-          @custom.merge! field.custom
+        def custom_field?
+          @order[0] == "c"
+        end
+
+
+        def merge!(field)
+          @name = field.name if @name.nil?
+          @type = field.type if @type.nil?
+          @custom.merge!(field.custom){|k1,v1,v2| v1}
         end
       end
     end

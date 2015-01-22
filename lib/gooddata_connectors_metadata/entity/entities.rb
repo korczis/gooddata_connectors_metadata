@@ -6,15 +6,48 @@ module GoodData
       class Entities
         include Enumerable
 
-        def initialize(args = {})
+        attr_accessor :entities
+        attr_reader :entities
+        # The configuration of entities will look like this
+        # "entity_name":{
+        #   "global":{
+        #       global_entity settings
+        #   },
+        #   "customer1":{
+        #       "customer specific "
+
+        # }
+
+
+        # }
+
+        def initialize(options = {})
           @entities = {}
-          if !args.empty? && args.include?('hash')
-            args['hash'].each do |entity_hash|
-              entity = Entity.new('hash' => entity_hash)
-              @entities[entity.id] = entity
-            end
-          end
         end
+
+
+
+        # def prepare_flat_collection
+        #   collection = @entities.flat_map do |key,value|
+        #     # No powered by
+        #     if (value.keys.count == 1 and value.keys[0] == "global")
+        #       value.values[0]
+        #     else
+        #       output = []
+        #       value.values.each do |element|
+        #         pp value
+        #         if (element.customer != "global")
+        #           output << element
+        #         end
+        #       end
+        #       output
+        #     end
+        #   end
+        #   collection
+        # end
+
+
+
 
         def [](id)
           @entities[id]
@@ -24,27 +57,22 @@ module GoodData
           @entities.values.each(&block)
         end
 
+        # def each_flatted(&block)
+        #   prepare_flat_collection.each(&block)
+        # end
+
+        # def each_customer(entity_name,&block)
+        #   @entities[entity_name].find_all{|key,value| key != "global"}.values.each(&block)
+        # end
+
         def include?(id)
           @entities.include?(id)
         end
 
+
         def <<(input_entity)
-          if input_entity.instance_of?(Entity)
-            if !@entities.include?(input_entity.id)
-              @entities[input_entity.id] = input_entity
-            else
-              @entities[input_entity.id].merge!(input_entity)
-            end
-          elsif input_entity.instance_of?(Hash)
-            entity = Entity.new('hash' => input_entity)
-            if !@entities.include?(entity.id)
-              @entities[entity.id] = entity
-            else
-              @entities[input_entity.id].merge!(entity)
-            end
-          else
-            fail EntityException, 'Unsuported type of input object. Supported types Hash,Entity'
-          end
+          @entities[input_entity.id] = {} if !@entities.include?(input_entity.id)
+          @entities[input_entity.id]= input_entity
         end
 
         def get_entity_names

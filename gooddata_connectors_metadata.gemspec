@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
   # Regular dependencies
   spec.add_dependency 'gooddata', '~> 0.6.3'
   spec.add_dependency 'mongo', '~> 1.10.2'
+  spec.add_dependency 'aws-sdk'
 end

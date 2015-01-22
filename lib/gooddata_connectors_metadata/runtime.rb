@@ -6,19 +6,8 @@ module GoodData
       class Runtime
         attr_accessor :global, :entity
         class << self
-          def fill(hash, options = {})
-            if hash.include?('global')
-              @global = hash['global']
-            else
-              @global = {}
-            end
-
-            if hash.include?('entity')
-              @entity = hash['entity']
-            else
-              @entity = {}
-            end
-            @now = DateTime.now if @now.nil?
+          def fill(options = {})
+            @now = Time.now if @now.nil?
           end
 
           def get_entity(id)
@@ -27,24 +16,6 @@ module GoodData
 
           def get_global(key)
             @global[key]
-          end
-
-          def set_entity_key_value(id, key, value)
-            @entity[id] = {} unless @entity.include?(id)
-            @entity[id][key] = value
-          end
-
-          def get_entity_value_by_key(id, key)
-            if @entity.include?(id)
-              @entity[id][key] = value if @entity[id].include?(key)
-            end
-          end
-
-          def to_hash
-            {
-              'global' => @global,
-              'entity' => @entity
-            }
           end
 
           def get_load_id
@@ -73,7 +44,11 @@ module GoodData
           end
 
           def now # rubocop:disable TrivialAccessors
-            @now
+            @now.utc
+          end
+
+          def now_timestamp
+            @now.utc.strftime("%s")
           end
         end
       end
